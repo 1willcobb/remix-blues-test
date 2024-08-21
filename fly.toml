@@ -1,4 +1,4 @@
-app = "RemixBlues-84cb"
+app = "remix-blues-testing"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]
