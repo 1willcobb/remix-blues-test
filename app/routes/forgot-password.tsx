@@ -25,15 +25,8 @@ export const action = async ({ request }) => {
 
     const token = await requestPasswordReset(email);
 
-    let resetUrl;
-    if (process.env.NODE_ENV === "development") {
-      resetUrl = `http://localhost:3000/reset-password?token=${token}`;
-    } else if (process.env.NODE_ENV === "staging") {
-      resetUrl = `https://remix-blues-testing-staging.fly.dev/?token=${token}`;
-    } else {
-      resetUrl = `https://remix-blues-testing.fly.dev/?token=${token}`;
-    }
-  
+    const url = new URL(request.url);
+    const resetUrl = `${url.origin}/reset-password?token=${token}`;
 
     const htmlsend = await render(<ResetEmail link={resetUrl} />, {
       pretty: true,
