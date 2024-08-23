@@ -6,10 +6,13 @@ import type {
 import { json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
 import { useEffect, useRef } from "react";
+import dunes from "~/images/dunes.jpg";
 
 import { verifyLogin } from "~/models/user.server";
-import { createUserSession, getUserId } from "~/session.server";
+import { createUserSession, getUserId, getUserByEmail } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
+
+
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId(request);
@@ -19,16 +22,25 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const email = formData.get("email");
+  const userOrEmail = formData.get("userOrEmail");
   const password = formData.get("password");
   const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
   const remember = formData.get("remember");
 
-  if (!validateEmail(email)) {
+  if (typeof userOrEmail !== "string" || userOrEmail.length === 0) {
     return json(
-      { errors: { email: "Email is invalid", password: null } },
+      { errors: { email: "Username or email is required", password: null } },
       { status: 400 },
     );
+  }
+
+  if (userOrEmail.includes("@")) {
+    if (!validateEmail(userOrEmail)) {
+      return json(
+        { errors: { email: "Email is invalid", password: null } },
+        { status: 400 },
+      );
+    }
   }
 
   if (typeof password !== "string" || password.length === 0) {
@@ -45,7 +57,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  const user = await verifyLogin(email, password);
+  const user = await verifyLogin(userOrEmail, password);
 
   if (!user) {
     return json(
@@ -66,7 +78,7 @@ export const meta: MetaFunction = () => [{ title: "Login" }];
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const redirectTo = searchParams.get("redirectTo") || "/";
   const actionData = useActionData<typeof action>();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -81,24 +93,30 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-full flex-col justify-center">
-      <div className="mx-auto w-full max-w-md px-8">
+      <div className="absolute h-screen md:inset-0">
+        <img
+          className="h-full w-full object-cover"
+          src={dunes}
+          alt="Dunes in Pismo Beach, California"
+        />
+      </div>
+      <div className="relative mx-auto w-full max-w-md px-8">
         <Form method="post" className="space-y-6">
           <div>
             <label
-              htmlFor="email"
+              htmlFor="userOrEmail"
               className="block text-sm font-medium text-gray-700"
             >
-              Email address
+              Username or Email
             </label>
             <div className="mt-1">
               <input
                 ref={emailRef}
-                id="email"
+                id="userOrEmail"
                 required
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus={true}
-                name="email"
-                type="email"
+                name="userOrEmail"
                 autoComplete="email"
                 aria-invalid={actionData?.errors?.email ? true : undefined}
                 aria-describedby="email-error"
@@ -136,16 +154,28 @@ export default function LoginPage() {
                 </div>
               ) : null}
             </div>
+            <div className="text-center text-sm text-secondary">
+              Forgot password?{" "}
+              <Link
+                className="text-blue-500 underline"
+                to={{
+                  pathname: "/forgot-password",
+                  search: searchParams.toString(),
+                }}
+              >
+                Click Here
+              </Link>
+            </div>
           </div>
 
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <button
             type="submit"
-            className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
+            className="w-full btn btn-neutral"
           >
             Log in
           </button>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-center justify-between">
             <div className="flex items-center">
               <input
                 id="remember"
@@ -155,12 +185,12 @@ export default function LoginPage() {
               />
               <label
                 htmlFor="remember"
-                className="ml-2 block text-sm text-gray-900"
+                className="ml-2 block text-sm text-secondary"
               >
                 Remember me
               </label>
             </div>
-            <div className="text-center text-sm text-gray-500">
+            <div className="text-center text-sm text-secondary">
               Don&apos;t have an account?{" "}
               <Link
                 className="text-blue-500 underline"

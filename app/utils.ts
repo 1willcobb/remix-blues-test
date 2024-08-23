@@ -1,5 +1,12 @@
 import { useMatches } from "@remix-run/react";
 import { useMemo } from "react";
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 
 import type { User } from "~/models/user.server";
 
@@ -74,3 +81,37 @@ export function useUser(): User {
 export function validateEmail(email: unknown): email is string {
   return typeof email === "string" && email.length > 3 && email.includes("@");
 }
+
+
+export function extractUserIdFromFullId(userId: string): number {
+  if(userId === null) return 0;
+  console.log(userId)
+  return parseInt(userId.split("#")[1], 10);
+}
+
+export function extractIdfromFullId(id: string): string {
+  if(id === null) return 0;
+  return id.split("#")[1]
+}
+
+export function dateConverter(createdAt: string) {
+  // Convert the string to a Date object
+  const date = new Date(createdAt);
+
+  // Check if the conversion was successful
+  if (!isNaN(date.getTime())) {
+    const options = { year: 'numeric', month: 'long', day: '2-digit' };
+    const formattedDate = date.toLocaleDateString('en-US', options);
+
+    return formattedDate;
+  } else {
+    console.error("Invalid date format");
+  }
+}
+
+export function truncateText(text, maxLength) {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return text.substring(0, maxLength) + '...';
+};

@@ -1,139 +1,143 @@
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { useEffect } from "react";
 import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
+import { NavLink } from "@remix-run/react";
+import dunes from "~/images/dunes.jpg";
+import { useOptionalUser, extractUserIdFromFullId } from "~/utils";
 
-import { useOptionalUser } from "~/utils";
-
-export const meta: MetaFunction = () => [{ title: "Remix Notes" }];
+export const meta: MetaFunction = () => {
+  return [
+    {
+      title: "MyFilmFriends",
+      description: "A community for photography lovers.",
+    },
+  ];
+};
 
 export default function Index() {
   const user = useOptionalUser();
-  return (
-    <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
-      <div className="relative sm:pb-16 sm:pt-8">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="relative shadow-xl sm:overflow-hidden sm:rounded-2xl">
-            <div className="absolute inset-0">
-              <img
-                className="h-full w-full object-cover"
-                src="https://user-images.githubusercontent.com/1500684/158276320-c46b661b-8eff-4a4d-82c6-cf296c987a12.jpg"
-                alt="BB King playing blues on his Gibson 'Lucille' guitar"
-              />
-              <div className="absolute inset-0 bg-[color:rgba(27,167,254,0.5)] mix-blend-multiply" />
-            </div>
-            <div className="relative px-4 pb-8 pt-16 sm:px-6 sm:pb-14 sm:pt-24 lg:px-8 lg:pb-20 lg:pt-32">
-              <h1 className="text-center text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
-                <span className="block uppercase text-blue-500 drop-shadow-md">
-                  Blues Stack
-                </span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-lg text-center text-xl text-white sm:max-w-3xl">
-                Check the README.md file for instructions on how to get this
-                project deployed.
-              </p>
-              <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
-                {user ? (
-                  <Link
-                    to="/notes"
-                    className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-blue-700 shadow-sm hover:bg-blue-50 sm:px-8"
-                  >
-                    View Notes for {user.email}
-                  </Link>
-                ) : (
-                  <div className="space-y-4 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5 sm:space-y-0">
-                    <Link
-                      to="/join"
-                      className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-blue-700 shadow-sm hover:bg-blue-50 sm:px-8"
-                    >
-                      Sign up
-                    </Link>
-                    <Link
-                      to="/login"
-                      className="flex items-center justify-center rounded-md bg-blue-500 px-4 py-3 font-medium text-white hover:bg-blue-600"
-                    >
-                      Log In
-                    </Link>
-                  </div>
-                )}
-              </div>
-              <a href="https://remix.run">
-                <img
-                  src="https://user-images.githubusercontent.com/1500684/158298926-e45dafff-3544-4b69-96d6-d3bcc33fc76a.svg"
-                  alt="Remix"
-                  className="mx-auto mt-16 w-full max-w-[12rem] md:max-w-[16rem]"
-                />
-              </a>
-            </div>
-          </div>
-        </div>
+  let userId;
+  if (user) {
+    userId = extractUserIdFromFullId(user.id);
+  }
 
-        <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-          <div className="mt-6 flex flex-wrap justify-center gap-8">
-            {[
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764397-ccd8ea10-b8aa-4772-a99b-35de937319e1.svg",
-                alt: "Fly.io",
-                href: "https://fly.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/158238105-e7279a0c-1640-40db-86b0-3d3a10aab824.svg",
-                alt: "PostgreSQL",
-                href: "https://www.postgresql.org/",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764484-ad64a21a-d7fb-47e3-8669-ec046da20c1f.svg",
-                alt: "Prisma",
-                href: "https://prisma.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764276-a516a239-e377-4a20-b44a-0ac7b65c8c14.svg",
-                alt: "Tailwind",
-                href: "https://tailwindcss.com",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764454-48ac8c71-a2a9-4b5e-b19c-edef8b8953d6.svg",
-                alt: "Cypress",
-                href: "https://www.cypress.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772386-75444196-0604-4340-af28-53b236faa182.svg",
-                alt: "MSW",
-                href: "https://mswjs.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772447-00fccdce-9d12-46a3-8bb4-fac612cdc949.svg",
-                alt: "Vitest",
-                href: "https://vitest.dev",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772662-92b0dd3a-453f-4d18-b8be-9fa6efde52cf.png",
-                alt: "Testing Library",
-                href: "https://testing-library.com",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772934-ce0a943d-e9d0-40f8-97f3-f464c0811643.svg",
-                alt: "Prettier",
-                href: "https://prettier.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772990-3968ff7c-b551-4c55-a25c-046a32709a8e.svg",
-                alt: "ESLint",
-                href: "https://eslint.org",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157773063-20a0ed64-b9f8-4e0b-9d1e-0b65a3d4a6db.svg",
-                alt: "TypeScript",
-                href: "https://typescriptlang.org",
-              },
-            ].map((img) => (
-              <a
-                key={img.href}
-                href={img.href}
-                className="flex h-16 w-32 justify-center p-1 grayscale transition hover:grayscale-0 focus:grayscale-0"
-              >
-                <img alt={img.alt} src={img.src} className="object-contain" />
-              </a>
-            ))}
-          </div>
+  useEffect(() => {
+    let socket;
+    if (process.env.NODE_ENV === "development") {
+      socket = new WebSocket("ws://localhost:3333");
+    } else if (process.env.NODE_ENV === "staging") {
+      console.log("Staging mode. connecting to Beta WebSocket");
+      socket = new WebSocket(
+        "wss://0r05a9b5d4.execute-api.us-west-1.amazonaws.com/staging",
+      );
+    } else {
+      console.log("Production mode. Connecting to Prod WebSocket");
+      socket = new WebSocket(
+        "wss://0r05a9b5d4.execute-api.us-west-1.amazonaws.com/staging",
+      );
+    }
+
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+
+      const message = JSON.stringify({ message: "Hello, friend!" });
+      console.log("Sending message: ", message);
+      socket.send(message);
+    };
+
+    socket.onmessage = (event) => {
+      console.log("Message From Server: ", event.data);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
+
+  return (
+    <main className="flex min-h-full flex-col justify-center">
+      <div className="absolute h-screen md:inset-0">
+        <img
+          className="h-full w-full object-cover"
+          src={dunes}
+          alt="Dunes in Pismo Beach, California"
+        />
+      </div>
+      <div className="relative m-auto w-full flex flex-col justify-center items-center">
+        <h1 className="text-center font-extrabold tracking-tight text-5xl md:text-6xl lg:text-9xl">
+          <span className="block uppercase text-red-500 drop-shadow-md">
+            MyFilmFriends
+          </span>
+        </h1>
+        <div className="mx-auto mt-10 max-w-sm flex justify-center">
+          {user ? (
+            <div className="flex flex-col justify-center">
+              <div className="mx-auto inline-grid grid-cols-2 gap-5 space-y-0">
+                <NavLink
+                  prefetch="viewport"
+                  to="/explore/comingsoon"
+                  className="btn btn-neutral"
+                >
+                  See Submissions
+                </NavLink>
+                <NavLink
+                  prefetch="viewport"
+                  to={`/me/${userId}/upload`}
+                  className="btn btn-neutral"
+                >
+                  Submit Photo
+                </NavLink>
+              </div>
+              <div className="mt-10 mx-2 p-5 h-full w-full">
+                <p className="text-neutral-content text-center">
+                  Welcome friendo {user.username}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col justify-center">
+              <div className="mx-auto inline-grid grid-cols-2 gap-5 space-y-0">
+                <NavLink
+                  prefetch="viewport"
+                  to="/join"
+                  className="btn btn-neutral"
+                >
+                  Sign up
+                </NavLink>
+                <NavLink
+                  prefetch="viewport"
+                  to="/login"
+                  className="btn btn-neutral"
+                >
+                  Log In
+                </NavLink>
+              </div>
+              <div className="mt-10 mx-2 p-5 h-full w-full">
+                <p className="text-white text-center">
+                  A community for photography lovers.
+                  <br />
+                  Others tell you what, when, and how to post.
+                  <br />
+                  We just want to see your photos.
+                </p>
+                <br />
+                <ul className="text-white text-center font-extrabold">
+                  <li>NO ADS</li>
+                  <li>NO AI</li>
+                  <li>NO VIDEO</li>
+                  <li>JUST PHOTOS</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

@@ -1,0 +1,10 @@
+-- AlterTable
+ALTER TABLE "Blog" ADD COLUMN     "commentCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "likeCount" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "Comment" ADD COLUMN     "blogId" TEXT,
+ADD COLUMN     "likeCount" INTEGER NOT NULL DEFAULT 0;
+
+-- AddForeignKey
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_blogId_fkey" FOREIGN KEY ("blogId") REFERENCES "Blog"("id") ON DELETE SET NULL ON UPDATE CASCADE;
