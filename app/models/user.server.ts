@@ -1,5 +1,6 @@
 import type { Password, User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import invariant from "tiny-invariant";
 
 import { prisma } from "~/db.server";
 
@@ -65,4 +66,16 @@ export async function verifyLogin(
   const { password: _password, ...userWithoutPassword } = userWithPassword;
 
   return userWithoutPassword;
+}
+
+export async function getUserTokens(userId: User["id"]) {
+
+const updatedUser = await prisma.user.findUnique({
+  where: { id: userId },
+  include: { tokens: true }, // Include the tokens relation
+});
+
+invariant(updatedUser, "User not found");
+
+return updatedUser.tokens;
 }

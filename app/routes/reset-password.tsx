@@ -20,8 +20,14 @@ export async function loader({ request }) {
 
 export async function action({ request }) {
   const formData = await request.formData();
-  const token = formData.get("token");
+  const url = new URL(request.url);
+
+  // Extract the token from the query parameter
+  const token = url.searchParams.get("token");
   const password = formData.get("password");
+
+  console.log('token', token);
+  console.log('password', password);
 
   if (typeof password !== "string" || password.length === 0) {
     return json(
@@ -38,9 +44,11 @@ export async function action({ request }) {
   }
 
   try {
+    console.log('resetting password');
     await resetPassword(token, password);
     return redirect("/login?success=password_reset");
   } catch (error) {
+    console.error(error);
     return json({ error: error.message }, { status: 400 });
   }
 }

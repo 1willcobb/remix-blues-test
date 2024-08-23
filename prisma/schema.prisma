@@ -8,25 +8,25 @@ generator client {
 }
 
 model User {
-  id             String       @id @default(uuid())
-  username       String       @unique
-  email          String       @unique
-  isAdmin        Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id             String               @id @default(uuid())
+  username       String               @unique
+  email          String               @unique
+  isAdmin        Boolean              @default(false)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
   password       Password?
   posts          Post[]
-  postCount      Int          @default(0)
+  postCount      Int                  @default(0)
   comments       Comment[]
   likes          Like[]
   votes          Vote[]
-  followers      UserFollow[] @relation("followersRelation")
-  followerCount  Int          @default(0)
-  following      UserFollow[] @relation("followingRelation")
-  followingCount Int          @default(0)
-  chats          Chat[]       @relation("ChatParticipants")
+  followers      UserFollow[]         @relation("followersRelation")
+  followerCount  Int                  @default(0)
+  following      UserFollow[]         @relation("followingRelation")
+  followingCount Int                  @default(0)
+  chats          Chat[]               @relation("ChatParticipants")
   messages       Message[]
-  blogs          Blog[]       @relation("UserBlogs")
+  blogs          Blog[]               @relation("UserBlogs")
   tokens         PasswordResetToken[]
 }
 
@@ -58,7 +58,7 @@ model Post {
   commentCount Int       @default(0)
   likes        Like[]
   likeCount    Int       @default(0)
-  votes        Vote[]    
+  votes        Vote[]
   voteCount    Int       @default(0)
 }
 
@@ -113,17 +113,17 @@ model Message {
 }
 
 model Blog {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  author    User     @relation("UserBlogs", fields: [authorId], references: [id], onDelete: Cascade)
-  authorId  String
-  likes     Like[]
-  likeCount Int      @default(0)
-  comments  Comment[]
-  commentCount Int   @default(0)
+  id           String    @id @default(uuid())
+  title        String
+  content      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  author       User      @relation("UserBlogs", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId     String
+  likes        Like[]
+  likeCount    Int       @default(0)
+  comments     Comment[]
+  commentCount Int       @default(0)
 }
 
 model Comment {
