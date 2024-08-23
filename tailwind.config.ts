@@ -29,7 +29,7 @@ export default {
           info: "#f4b1c9",
           success: "#f4b1c9",
           warning: "#f4b1c9",
-          error: "#f4b1c9",
+          error: "#f4b1c0",
       }
     }
     ],
