@@ -1,5 +1,5 @@
 import { json, redirect } from "@remix-run/node";
-import { useLoaderData, Form, useActionData } from "@remix-run/react";
+import { Form, useActionData } from "@remix-run/react";
 import { useEffect, useRef } from "react";
 import dunes from "~/images/dunes.jpg";
 
