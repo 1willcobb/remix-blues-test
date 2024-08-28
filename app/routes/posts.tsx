@@ -8,8 +8,13 @@ import {
   Outlet,
 } from "@remix-run/react";
 
+import { useState } from "react";
+
+import TipTap from "~/components/TipTap";
+
 import { getUserPosts, createPost, deletePost } from "~/models/post.server";
 import { requireUserId } from "~/session.server";
+
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -18,7 +23,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const pageSize = parseInt(url.searchParams.get("pageSize") || "10", 10);
 
   const posts = await getUserPosts(userId, page, pageSize);
-
 
   return { posts, userId, page, pageSize };
 };
@@ -52,9 +56,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Posts() {
   const { posts, userId, page, pageSize } = useLoaderData();
   const fetcher = useFetcher();
+  const [content, setContent] = useState('');
 
   console.log(posts);
 
+  //! ENDED here 8/23/24
   return (
     <div className="grid grid-rows-2 grid-cols-2 items-center text-center w-full h-1/2 bg-slate-200">
       <div>
@@ -62,12 +68,12 @@ export default function Posts() {
         <fetcher.Form method="post">
           <input type="hidden" name="userId" value={userId} />
           <input
-            type="text"
+            type="hidden"
             name="content"
-            placeholder="Content"
-            defaultValue=""
+            value={content}
             key={fetcher.state === "submitting" ? "new" : "default"}
           />
+          <TipTap content={content} setContent={setContent} />
           <button type="submit">Create Post</button>
         </fetcher.Form>
       </div>
@@ -116,6 +122,7 @@ export default function Posts() {
       </div>
       <div className="col-span-2">
         <Outlet />
+        
       </div>
     </div>
   );

@@ -65,6 +65,25 @@ export async function requireUser(request: Request) {
   throw await logout(request);
 }
 
+export async function requireUserIdForUserData(request: Request, locationCheck: string) {
+  const userId = await requireUserId(request);
+
+
+  console.log('locationCheck', locationCheck);
+
+
+  // Compare locationCheck to userId
+  if (locationCheck !== userId) {
+    throw await logout(request);
+  }
+
+  // If they match, return user
+  const user = await getUserById(userId);
+  if (user) return user;
+
+  throw await logout(request);
+}
+
 export async function createUserSession({
   request,
   userId,

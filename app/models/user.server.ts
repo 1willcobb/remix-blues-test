@@ -68,6 +68,16 @@ export async function verifyLogin(
   return userWithoutPassword;
 }
 
+export async function updateUser(
+  userId: User["id"],
+  data: Partial<User>,
+) {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
+  });
+}
+
 export async function getUserTokens(userId: User["id"]) {
 
 const updatedUser = await prisma.user.findUnique({

@@ -5,9 +5,12 @@ import {
   RiMessage2Fill,
   RiMessage2Line,
 } from "react-icons/ri";
-import { extractUserIdFromFullId } from "../utils";
 
 import config from "~/config";
+
+import { extractUserIdFromFullId } from "../utils";
+
+
 
 interface HeaderProps {
   friendUsername: string | null;

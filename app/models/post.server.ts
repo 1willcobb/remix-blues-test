@@ -47,29 +47,40 @@ export async function createPost({
   imageUrl?: string;
   userId: string;
 }): Promise<Post> {
-  const post = await prisma.post.create({
-    data: {
-      content,
-      imageUrl,
-      user: {
-        connect: { id: userId },
+  console.log("Creating post for user:", userId);
+  console.log("Content:", content);
+  console.log("Image URL:", imageUrl);
+
+  try {
+    const post = await prisma.post.create({
+      data: {
+        content,
+        imageUrl,
+        user: {
+          connect: { id: userId },
+        },
       },
-    },
-    include: {
-      user: true,
-      comments: true,
-      likes: true,
-      votes: true,
-    },
-  });
+      include: {
+        user: true,
+        comments: true,
+        likes: true,
+        votes: true,
+      },
+    });
+  
+    // Increment postCount for the user
+    await prisma.user.update({
+      where: { id: userId },
+      data: { postCount: { increment: 1 } },
+    });
+    return post;
+  } catch (error) {
+    console.error("Error creating post:", error);
+    throw error;
+  }
+  
 
-  // Increment postCount for the user
-  await prisma.user.update({
-    where: { id: userId },
-    data: { postCount: { increment: 1 } },
-  });
-
-  return post;
+  
 }
 
 export async function getUserPosts(userId: string, page: number = 1, pageSize: number = 10): Promise<Post[]> {
