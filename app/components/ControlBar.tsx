@@ -20,7 +20,7 @@ export default function ControlBar() {
     return currentPath.includes(path);
   };
 
-  const id = user.id.split("#")[1];
+  const id = user.id
 
   return (
     <nav className="sticky bg-secondary bottom-0 left-0 px-6 right-0 shadow-md flex justify-around items-center font-extrabold text-2xl z-50 h-[45px]">
