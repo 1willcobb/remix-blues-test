@@ -80,12 +80,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  await createUser(email, password, username);
+  await createUser(email, username, password);
 
   const user = await getUserByUsername(username);
   console.log("USER " + user);  
 
-  const redirectTo =  `/me/${user.username}`;
+  const redirectTo =  `/me/${user.id}`;
 
   console.log("REDIRECT TO " + redirectTo);
 

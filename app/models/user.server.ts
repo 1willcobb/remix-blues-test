@@ -39,33 +39,42 @@ export async function deleteUserByEmail(email: User["email"]) {
 }
 
 export async function verifyLogin(
-  email: User["email"],
+  userOrEmail: string,
   password: Password["hash"],
 ) {
-  const userWithPassword = await prisma.user.findUnique({
-    where: { email },
-    include: {
-      password: true,
-    },
+  let user;
+
+  if (userOrEmail.includes("@")) {
+    user = await getUserByEmail(userOrEmail);
+  } else {
+    user = await getUserByUsername(userOrEmail);
+  }
+
+  if (!user) {
+    return undefined;
+  }
+
+  const userPassword = await getUserPasswordById(user.id);
+  if (!userPassword) {
+    return undefined;
+  }
+
+  const isValid = await bcrypt.compare(password, userPassword.hash);
+  if (!isValid) {
+    return undefined;
+  }
+
+  return user;
+}
+
+async function getUserPasswordById(id: User["id"]) {
+  console.log("getUserPasswordById", id);
+  const result = await prisma.password.findUnique({
+    where: { userId: id },
   });
 
-  if (!userWithPassword || !userWithPassword.password) {
-    return null;
-  }
-
-  const isValid = await bcrypt.compare(
-    password,
-    userWithPassword.password.hash,
-  );
-
-  if (!isValid) {
-    return null;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password: _password, ...userWithoutPassword } = userWithPassword;
-
-  return userWithoutPassword;
+  if (result) return { hash: result.hash }; 
+  return null;
 }
 
 export async function updateUser(

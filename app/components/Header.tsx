@@ -8,10 +8,6 @@ import {
 
 import config from "~/config";
 
-import { extractUserIdFromFullId } from "../utils";
-
-
-
 interface HeaderProps {
   friendUsername: string | null;
 }
@@ -29,11 +25,7 @@ export default function Header({ friendUsername }: HeaderProps) {
     return currentPath.includes(path);
   };
 
-  let userId = null;
-  if (user) {
-    // console.log("user on header  " + JSON.stringify(user, null, 2));
-    userId = extractUserIdFromFullId(user.id);
-  }
+  const userId = user.id
 
   return (
     <header className="sticky left-0 right-0 top-0 z-50 bg-white h-[53px]">
@@ -60,8 +52,8 @@ export default function Header({ friendUsername }: HeaderProps) {
           </Link>
         </div>
         <div className="flex gap-4">
-          <Link prefetch="viewport" to="/announcements">
-            {isActive("announcements") ? (
+          <Link prefetch="viewport" to="/blog">
+            {isActive("blog") ? (
               <RiMegaphoneFill className="size-6" />
             ) : (
               <RiMegaphoneLine className="size-6" />
