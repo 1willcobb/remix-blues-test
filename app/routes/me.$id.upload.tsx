@@ -10,7 +10,6 @@ import {
 import { useState, useRef } from "react";
 import { json, ActionFunction, redirect } from "@remix-run/node";
 
-
 import { createPost } from "~/models/post.server";
 import { requireUser } from "~/session.server";
 import { uploadFile } from "~/utils/photoUploadUtils.server";
@@ -39,7 +38,7 @@ export const action: ActionFunction = async ({ request }) => {
   if (!file || !(file instanceof File)) {
     return json(
       { error: "No file uploaded or incorrect file type" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -70,12 +69,16 @@ export default function Upload() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleCaptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleCaptionChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
     setCaption(event.target.value);
   };
 
   // Handle file change and compression
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
 
     console.log("File selected:", file);
@@ -145,7 +148,11 @@ export default function Upload() {
         {!loading ? (
           <div>
             {filePreviewUrl ? (
-              <img src={filePreviewUrl} alt="File preview" className="size-full" />
+              <img
+                src={filePreviewUrl}
+                alt="File preview"
+                className="size-full"
+              />
             ) : null}
 
             {!filePreviewUrl ? (
@@ -158,10 +165,16 @@ export default function Upload() {
                   style={{ display: "none" }}
                 />
                 <div className="grid grid-cols-2 gap-4 w-full">
-                  <button className="btn btn-outline" onClick={() => navigate(-1)}>
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => navigate(-1)}
+                  >
                     Back
                   </button>
-                  <button className="btn btn-neutral" onClick={triggerFileInput}>
+                  <button
+                    className="btn btn-neutral"
+                    onClick={triggerFileInput}
+                  >
                     Select Image
                   </button>
                 </div>
@@ -178,7 +191,6 @@ export default function Upload() {
               Camera
             </label>
             <input type="text" name="camera" placeholder="Mamiya 7ii" />
-            <input type="hidden" name="file" value={compressFile} />
             <label htmlFor="caption" className="text-left">
               Caption
             </label>
@@ -197,7 +209,11 @@ export default function Upload() {
                 Cancel
               </Link>
 
-              <button className="btn btn-neutral" type="submit" disabled={loading}>
+              <button
+                className="btn btn-neutral"
+                type="submit"
+                disabled={loading}
+              >
                 Submit
               </button>
             </div>
@@ -215,4 +231,3 @@ export function ErrorBoundary() {
   }
   return <ErrorBoundaryGeneral page="user index" />;
 }
-
