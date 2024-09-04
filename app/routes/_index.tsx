@@ -16,10 +16,7 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const user = useOptionalUser();
-  let userId;
-  if (user) {
-    userId = extractUserIdFromFullId(user.id);
-  }
+
 
   useEffect(() => {
     let socket;
@@ -90,7 +87,7 @@ export default function Index() {
                 </NavLink>
                 <NavLink
                   prefetch="viewport"
-                  to={`/me/${userId}/upload`}
+                  to={`/me/${user.id}/upload`}
                   className="btn btn-neutral"
                 >
                   Submit Photo

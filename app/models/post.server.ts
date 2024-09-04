@@ -84,14 +84,19 @@ export async function createPost({
 }
 
 export async function getUserPosts(userId: string, page: number = 1, pageSize: number = 10): Promise<Post[]> {
-  const skip = (page - 1) * pageSize;
+  const safePage = Math.max(1, isNaN(page) ? 1 : page);
+  const safePageSize = Math.max(1, isNaN(pageSize) ? 10 : pageSize);
+
+  const skip = (safePage - 1) * safePageSize;
+  
+  console.log("Getting posts for user:", userId, "Page:", page, "PageSize:", pageSize);
 
   const posts = await prisma.post.findMany({
     where: {
       userId: userId, // Filter posts by the specific user
     },
     orderBy: {
-      createdAt: "asc", // Sort posts chronologically
+      createdAt: "desc", // Sort posts chronologically
     },
     include: {
       user: true,
@@ -110,6 +115,8 @@ export async function getUserPosts(userId: string, page: number = 1, pageSize: n
   if (hasNextPage) {
     posts.pop();
   }
+
+  console.log("Posts:", posts);
 
   return posts;
 }
@@ -180,4 +187,166 @@ export async function getPostById(postId: string): Promise<Post | null> {
       votes: true,
     },
   });
+}
+
+export async function getMonthlyTopPosts(page: number = 1, pageSize: number = 10): Promise<Post[]> {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+
+  // Define the start and end of the current month
+  const startOfMonth = new Date(currentYear, currentMonth, 1);
+  const endOfMonth = new Date(currentYear, currentMonth + 1, 1);
+
+  // Calculate how many records to skip based on the current page
+  const skip = (page - 1) * pageSize;
+
+  const topPosts = await prisma.post.findMany({
+    where: {
+      createdAt: {
+        gte: startOfMonth, // Start of the current month
+        lt: endOfMonth, // Start of the next month
+      },
+      voteCount: {
+        gt: 0, // Filter out posts with no votes
+      },
+    },
+    orderBy: {
+      voteCount: "desc", // Sort by the number of votes in descending order
+    },
+    skip: skip,       // Skip records for pagination
+    take: pageSize,   // Take the specified number of records
+    include: {
+      user: true,
+      comments: true,
+      likes: true,
+      votes: true,
+    },
+  });
+
+  return topPosts;
+}
+
+// post.server.ts
+
+export async function getSurroundingMonthlyPosts(postId: string) {
+  // Fetch the current post to get its createdAt date
+  const currentPost = await prisma.post.findUnique({
+    where: { id: postId },
+    select: { createdAt: true },
+  });
+
+  if (!currentPost) {
+    throw new Error("Post not found");
+  }
+
+  const currentYear = currentPost.createdAt.getFullYear();
+  const currentMonth = currentPost.createdAt.getMonth();
+  const startOfMonth = new Date(currentYear, currentMonth, 1);
+  const endOfMonth = new Date(currentYear, currentMonth + 1, 1);
+
+  // Fetch previous posts
+  const previousPosts = await prisma.post.findMany({
+    where: {
+      createdAt: {
+        lt: currentPost.createdAt,
+        gte: startOfMonth,
+      },
+      voteCount: {
+        gt: 0,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 2, // Adjust this number as needed
+    include: {
+      user: true,
+      comments: true,
+      likes: true,
+      votes: true,
+    },
+  });
+
+  // Fetch next posts
+  const nextPosts = await prisma.post.findMany({
+    where: {
+      createdAt: {
+        gt: currentPost.createdAt,
+        lt: endOfMonth,
+      },
+      voteCount: {
+        gt: 0,
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    take: 2, // Adjust this number as needed
+    include: {
+      user: true,
+      comments: true,
+      likes: true,
+      votes: true,
+    },
+  });
+
+  return { previousPosts, nextPosts };
+}
+
+
+export async function getPreviousMonthlyPosts(postId: string, lastPostDate: string): Promise<Post[]> {
+  const date = new Date(lastPostDate);
+  const currentYear = date.getFullYear();
+  const currentMonth = date.getMonth();
+  const startOfMonth = new Date(currentYear, currentMonth, 1);
+
+  const previousPosts = await prisma.post.findMany({
+    where: {
+      createdAt: {
+        lt: date,
+        gte: startOfMonth,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 2, // Adjust this number as needed
+    include: {
+      user: true,
+      comments: true,
+      likes: true,
+      votes: true,
+    },
+  });
+
+  return previousPosts;
+}
+
+export async function getNextMonthlyPosts(postId: string, lastPostDate: string): Promise<Post[]> {
+  const date = new Date(lastPostDate);
+  const currentYear = date.getFullYear();
+  const currentMonth = date.getMonth();
+  const endOfMonth = new Date(currentYear, currentMonth + 1, 1);
+
+  const nextPosts = await prisma.post.findMany({
+    where: {
+      createdAt: {
+        gt: date,
+        lt: endOfMonth,
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    take: 2, // Adjust this number as needed
+    include: {
+      user: true,
+      comments: true,
+      likes: true,
+      votes: true,
+    },
+  });
+
+  return nextPosts;
 }

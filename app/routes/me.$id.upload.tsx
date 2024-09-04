@@ -134,7 +134,7 @@ export default function Upload() {
         throw new Error("Failed to upload");
       }
 
-      navigate(`/explore/comingsoon`);
+      navigate(`/explore`);
     } catch (error) {
       console.error("Error submitting form:", error);
       setLoading(false);
