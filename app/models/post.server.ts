@@ -116,7 +116,7 @@ export async function getUserPosts(userId: string, page: number = 1, pageSize: n
     posts.pop();
   }
 
-  console.log("Posts:", posts);
+  // console.log("Posts:", posts);
 
   return posts;
 }

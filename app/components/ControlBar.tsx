@@ -23,7 +23,7 @@ export default function ControlBar() {
   const id = user.id
 
   return (
-    <nav className="sticky bg-secondary bottom-0 left-0 px-6 right-0 shadow-md flex justify-around items-center font-extrabold text-2xl z-50 h-[45px]">
+    <nav className="sticky bg-white bottom-0 left-0 px-6 right-0 shadow-md flex justify-around items-center font-extrabold text-2xl z-50 h-[45px]">
       <Link
         to="/friends"
         className="flex justify-center items-center h-full w-1/4 touch-manipulation"

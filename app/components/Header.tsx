@@ -52,14 +52,14 @@ export default function Header({ friendUsername }: HeaderProps) {
           </Link>
         </div>
         <div className="flex gap-4">
-          <Link prefetch="viewport" to="/blog">
+          <Link to="/blog">
             {isActive("blog") ? (
               <RiMegaphoneFill className="size-6" />
             ) : (
               <RiMegaphoneLine className="size-6" />
             )}
           </Link>
-          <Link prefetch="intent" to={`/me/${userId}/messages`}>
+          <Link to={`/me/${userId}/messages`}>
             {isActive("messages") ? (
               <RiMessage2Fill className="size-6" />
             ) : (

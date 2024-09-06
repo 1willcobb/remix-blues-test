@@ -23,6 +23,7 @@ import styles from "./globals.css";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
+  { rel: "icon", href: "/favicon.ico" },
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
 
@@ -41,7 +42,7 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await getUser(request);
 
-console.log('user', user);
+  console.log("user", user);
   return { user };
 };
 
