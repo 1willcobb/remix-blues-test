@@ -13,11 +13,10 @@ import { truncateText } from "~/utils";
 
 interface Props {
   friend: User;
-  count: UserCount;
   isFollowing: boolean;
 }
 
-export default function FriendHeader({ friend, count, isFollowing }: Props) {
+export default function FriendHeader({ friend, isFollowing }: Props) {
   const { user } = useRouteLoaderData("root");
 
   return (
@@ -30,15 +29,15 @@ export default function FriendHeader({ friend, count, isFollowing }: Props) {
         />
         <div className="flex flex-grow justify-evenly ml-4">
           <NavLink to="stats/featured" className="flex flex-col items-center">
-            <p>{count?.featuredCount ?? 0}</p>
+            <p>{friend.featuredCount ?? 0}</p>
             <h3 className="font-bold">Featured</h3>
           </NavLink>
           <NavLink to="stats/followers" className="flex flex-col items-center">
-            <p>{count?.followerCount ?? 0}</p>
+            <p>{friend.followerCount ?? 0}</p>
             <h3 className="font-bold">Followers</h3>
           </NavLink>
           <NavLink to="stats/following" className="flex flex-col items-center">
-            <p>{count?.followingCount ?? 0}</p>
+            <p>{friend.followingCount ?? 0}</p>
             <h3 className="font-bold">Following</h3>
           </NavLink>
         </div>

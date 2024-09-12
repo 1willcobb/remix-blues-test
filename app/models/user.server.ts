@@ -7,21 +7,21 @@ import { prisma } from "~/db.server";
 export type { User } from "@prisma/client";
 
 export async function getUserById(id: User["id"]) {
-  return prisma.user.findUnique({ where: { id } });
+  return await prisma.user.findUnique({ where: { id } });
 }
 
 export async function getUserByUsername(username: User["username"]) {
-  return prisma.user.findUnique({ where: { username } });
+  return await prisma.user.findUnique({ where: { username } });
 }
 
 export async function getUserByEmail(email: User["email"]) {
-  return prisma.user.findUnique({ where: { email } });
+  return await prisma.user.findUnique({ where: { email } });
 }
 
 export async function createUser(email: User["email"], username: User["username"],password: string) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  return prisma.user.create({
+  return await prisma.user.create({
     data: {
       email,
       username,
@@ -35,7 +35,7 @@ export async function createUser(email: User["email"], username: User["username"
 }
 
 export async function deleteUserByEmail(email: User["email"]) {
-  return prisma.user.delete({ where: { email } });
+  return await prisma.user.delete({ where: { email } });
 }
 
 export async function verifyLogin(
@@ -97,4 +97,12 @@ const updatedUser = await prisma.user.findUnique({
 invariant(updatedUser, "User not found");
 
 return updatedUser.tokens;
+}
+
+export async function getAllUsers() {
+  return await prisma.user.findMany({
+    orderBy: {
+      createdAt: 'asc', // Orders users in ascending order by creation date (oldest to newest)
+    },
+  });
 }
