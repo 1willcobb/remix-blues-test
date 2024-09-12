@@ -60,13 +60,13 @@ export default function ControlBar() {
       >
         {isActive(`/${user.username}`) ? (
           <img
-            src={user.profilePictureUrl}
+            src={user.profileImage}
             className="size-6 rounded-full object-cover border border-black"
             alt="user profile"
           />
         ) : (
           <img
-            src={user.profilePictureUrl}
+            src={user.profileImage}
             className="size-6 rounded-full object-cover"
             alt="user profile"
           />

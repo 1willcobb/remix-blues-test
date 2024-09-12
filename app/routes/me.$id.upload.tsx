@@ -116,6 +116,8 @@ export default function Upload() {
       return;
     }
 
+    console.log("compressed file for uploading:", compressedFile);
+
     const formData = new FormData();
     formData.append("caption", caption);
     formData.append("file", compressedFile); // Append the actual file

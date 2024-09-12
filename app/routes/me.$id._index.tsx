@@ -1,5 +1,3 @@
-
-
 import {
   type ActionFunctionArgs,
   json,
@@ -13,15 +11,21 @@ import {
   useActionData,
   useRouteError,
   isRouteErrorResponse,
+  useNavigate,
 } from "@remix-run/react";
 import { useState, useRef, useEffect } from "react";
 
 import ErrorBoundaryGeneral from "~/components/ErrorBoundaryGeneral";
-import { updateUser, getUserByEmail, getUserByUsername } from "~/models/user.server";
+import {
+  updateUser,
+  getUserByEmail,
+  getUserByUsername,
+} from "~/models/user.server";
 import { requireUserIdForUserData, requireUserId } from "~/session.server";
 import { validateEmail } from "~/utils";
-import { compressAndUploadFile } from "~/utils/photoUploadUtils.server";
+import { uploadFile } from "~/utils/photoUploadUtils.server";
 
+import { compressFile } from "~/utils/imageCompresser";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -36,14 +40,27 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   console.log("formData", formData);
 
-  const profilePictureUrl = formData.get("profilePictureUrl") as string;
+  const media = formData.get("profileImage") as string;
+  const imageChanged = formData.get("imageChanged") as string;
+  const profileImageNew = formData.get("profileImageNew") as string;
+
   const username = formData.get("username") as string;
   const displayName = formData.get("displayName") as string;
   const email = formData.get("email") as string;
   const userBio = formData.get("userBio") as string;
   const userId = formData.get("userId") as string;
-  const url = formData.get("url") as string;
-  const altName = formData.get("altName") as string;
+  const link = formData.get("url") as string;
+  const linkAltName = formData.get("altName") as string;
+
+  console.log("media", typeof media, media);
+
+  let profileImage = media ? media.name : null; // Check if the media file exists
+  if (imageChanged === "true" && media) {
+    console.log("Image changed");
+    profileImage = await uploadFile(media); // Pass the actual File object directly
+  } else {
+    console.log("Image not changed");
+  }
 
   if (!validateEmail(email)) {
     return json(
@@ -77,17 +94,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   const updatedUser = await updateUser(userId, {
-    profilePictureUrl,
+    profileImage,
     username,
     displayName,
     email,
     userBio,
-    link: { url, altName },
+    link,
+    linkAltName,
   });
 
   console.log("updatedUser", updatedUser);
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return redirect(`/${updatedUser?.username}`);
 };
@@ -96,24 +112,38 @@ export default function Me() {
   const { user } = useRouteLoaderData("root");
   const actionData = useActionData<typeof action>();
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [compressedFile, setCompressedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [imageChanged, setImageChanged] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
+  // Handle file change and compression
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
 
+    console.log("File selected:", file);
     if (file && isValidFileType(file)) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFilePreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const { compressedFile } = await compressFile(file);
+        setCompressedFile(compressedFile);
 
-      setLoading(false);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFilePreviewUrl(reader.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+        console.log("compressedFile ", compressedFile);
+        setLoading(false);
+        setImageChanged(true);
+      } catch (error) {
+        console.error("Error compressing file:", error);
+      }
     }
   };
 
@@ -122,7 +152,7 @@ export default function Me() {
     return allowedTypes.includes(file.type);
   };
 
-  const triggerFileInput = () => {
+  const triggerFileInput = async () => {
     fileInputRef.current?.click();
     setLoading(true);
   };
@@ -135,24 +165,46 @@ export default function Me() {
     }
   }, [actionData]);
 
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = formRef.current!;
+    const formData = new FormData(form);
+
+    if (compressedFile) {
+      formData.delete("profileImage");
+      formData.append("profileImage", compressedFile);
+    }
+
+    form.submit();
+
+    setTimeout(() => {
+      setLoading(false);
+      navigate(`/${user.username}`);
+    }, 500);
+  };
+
   return (
     <section className="flex flex-col w-full">
       <div className="collapse collapse-arrow ">
-        {!user.displayName ? (<input type="radio" name="my-accordion-2" defaultChecked />) : <input type="radio" name="my-accordion-2" />}
-        
+        {!user.displayName ? (
+          <input type="radio" name="my-accordion-2" defaultChecked />
+        ) : (
+          <input type="radio" name="my-accordion-2" />
+        )}
+
         <div className="collapse-title text-xl font-bold">Profile</div>
         <div className="collapse-content">
           <Form
             method="post"
             className="flex flex-col"
-            onSubmit={() => setLoading(true)}
+            encType="multipart/form-data"
+            onSubmit={handleSubmit}
+            ref={formRef} // Reference the form
           >
             <div className=" flex justify-between items-center ml-3">
-              {user.profilePictureUrl || filePreviewUrl ? (
+              {user.profileImage || filePreviewUrl ? (
                 <img
-                  src={
-                    !filePreviewUrl ? user.profilePictureUrl : filePreviewUrl
-                  }
+                  src={!filePreviewUrl ? user.profileImage : filePreviewUrl}
                   alt={user.username}
                   className="rounded-full size-20"
                 />
@@ -162,6 +214,7 @@ export default function Me() {
               <div>
                 <input
                   type="file"
+                  name="profileImage" // Important: This should match in the `action`
                   accept=".jpeg,.jpg,.png,image/*"
                   ref={fileInputRef}
                   onChange={handleFileChange}
@@ -176,11 +229,10 @@ export default function Me() {
                 </button>
               </div>
             </div>
-
             <input
               type="hidden"
-              name="profilePictureUrl"
-              value={!filePreviewUrl ? user.profilePictureUrl : filePreviewUrl}
+              name="imageChanged"
+              value={imageChanged.toString()}
             />
             <input type="hidden" name="userId" value={user.id} />
             <div className="form-control">
@@ -257,7 +309,7 @@ export default function Me() {
                   type="text"
                   placeholder="Alt Title"
                   className="input input-bordered"
-                  defaultValue={user.link?.altName || ""}
+                  defaultValue={user.linkAltName || ""}
                 />
               </label>
             </div>
@@ -269,7 +321,7 @@ export default function Me() {
                   name="url"
                   placeholder="URL Link"
                   className="input input-bordered"
-                  defaultValue={user.link?.url || ""}
+                  defaultValue={user.link || ""}
                 />
               </label>
             </div>
@@ -362,11 +414,10 @@ export default function Me() {
         className="sticky bottom-0 left-0 right-0 bg-white z-50"
       >
         <div className="m-3 ">
-        <button type="submit" className="mx-auto btn btn-outline w-full">
-          Logout
-        </button>
+          <button type="submit" className="mx-auto btn btn-outline w-full">
+            Logout
+          </button>
         </div>
-       
       </Form>
     </section>
   );

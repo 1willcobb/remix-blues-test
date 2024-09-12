@@ -1,0 +1,6 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('FRIEND', 'GUEST', 'MODERATOR', 'SUPERADMIN');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'FRIEND',
+ADD COLUMN     "userBio" TEXT;

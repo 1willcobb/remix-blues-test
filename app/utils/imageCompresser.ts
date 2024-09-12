@@ -20,7 +20,7 @@ export async function compressFile(file) {
     // Create a new File object from the Blob
     const compressedFile = new File(
       [compressedBlob],
-      file.name || `compressed-${Date.now()}.jpg`,
+      `compressed-${file.name}` || `compressed-${Date.now()}.jpg`,
       {
         type: file.type || "image/jpeg",
       }
