@@ -41,6 +41,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   console.log("formData", formData);
 
   const media = formData.get("profileImage") as string;
+  const profileImageUrl = formData.get("profileImageUrl") as string;
   const imageChanged = formData.get("imageChanged") as string;
   const profileImageNew = formData.get("profileImageNew") as string;
 
@@ -52,12 +53,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const link = formData.get("url") as string;
   const linkAltName = formData.get("altName") as string;
 
-  console.log("media", typeof media, media);
+  console.log("media", media);
+  console.log("profileImageUrl", profileImageUrl);
+  console.log("imageChanged", imageChanged);
+  console.log("profileImageNew", profileImageNew);
 
-  let profileImage = media ? media.name : null; // Check if the media file exists
-  if (imageChanged === "true" && media) {
+  let profileImage = profileImageUrl; // Check if the media file exists
+  if (imageChanged === "true" && profileImageNew) {
     console.log("Image changed");
-    profileImage = await uploadFile(media); // Pass the actual File object directly
+    profileImage = await uploadFile(profileImageNew); // Pass the actual File object directly
   } else {
     console.log("Image not changed");
   }
@@ -165,22 +169,33 @@ export default function Me() {
     }
   }, [actionData]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = formRef.current!;
     const formData = new FormData(form);
 
+    console.log("compressedFile in submit handler", compressedFile);
+
     if (compressedFile) {
+      console.log("compressed file for uploading:", compressedFile);
+      formData.delete("profileImageNew");
       formData.delete("profileImage");
-      formData.append("profileImage", compressedFile);
+      formData.append("profileImageNew", compressedFile);
+    } else {
+      console.error("No compressed file available to upload.");
     }
 
-    form.submit();
+    formData.forEach((value, key) => {
+      console.log(key, value); // Check if 'profileImageNew' contains the file object
+    });
 
-    setTimeout(() => {
-      setLoading(false);
-      navigate(`/${user.username}`);
-    }, 500);
+    // This doesnt handle errors but whatever. this is the compressed image.
+    await fetch(form.action, {
+      method: "POST",
+      body: formData,
+    });
+
+    navigate(`/${user.username}`); // Navigate to the appropriate page
   };
 
   return (
@@ -233,6 +248,11 @@ export default function Me() {
               type="hidden"
               name="imageChanged"
               value={imageChanged.toString()}
+            />
+            <input
+              type="hidden"
+              name="profileImageUrl"
+              value={user.profileImage || ""}
             />
             <input type="hidden" name="userId" value={user.id} />
             <div className="form-control">
