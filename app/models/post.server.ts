@@ -3,7 +3,18 @@ import type { Post } from "@prisma/client";
 import { prisma } from "~/db.server"; // Ensure this path is correct
 
 
-export async function getUserFeed(userId: string, page: number = 1, pageSize: number = 10): Promise<Post[]> {
+export async function getUserFeed(
+  userId: string, 
+  page: number = 1, 
+  pageSize: number = 10
+): Promise<{ posts: Post[]; hasMore: boolean; pageSize: number }> {
+
+  const safePage = Math.max(1, isNaN(page) ? 1 : page);
+  const safePageSize = Math.max(1, isNaN(pageSize) ? 10 : pageSize);
+
+  const skip = (safePage - 1) * safePageSize;
+
+  console.log("Getting User Feed", page, "PageSize:", pageSize);
   // Get the list of userIds that the current user is following
   const followedUsers = await prisma.userFollow.findMany({
     where: { followerId: userId },
@@ -12,18 +23,21 @@ export async function getUserFeed(userId: string, page: number = 1, pageSize: nu
 
   const followedUserIds = followedUsers.map((follow) => follow.followedId);
 
+  const userAndFollowedIds = [...followedUserIds, userId];
+
+  console.log("Followed users:", userAndFollowedIds);
   // Calculate how many records to skip based on the current page
-  const skip = (page - 1) * pageSize;
+  // const skip = (page - 1) * pageSize;
 
   // Get the posts from those followed users with pagination
   const feedPosts = await prisma.post.findMany({
     where: {
       userId: {
-        in: followedUserIds,
+        in: userAndFollowedIds,
       },
     },
     orderBy: {
-      createdAt: "asc", // Sort posts chronologically (most recent first)
+      createdAt: "desc", // Sort posts chronologically
     },
     include: {
       user: true,
@@ -31,11 +45,24 @@ export async function getUserFeed(userId: string, page: number = 1, pageSize: nu
       likes: true,
       votes: true,
     },
-    skip: skip, // Skip records for pagination
-    take: pageSize, // Take the specified number of records
+    skip: skip,
+    take: pageSize + 1, // Fetch one more than needed to check if there's a next page
   });
 
-  return feedPosts;
+  for (let post of feedPosts) {
+    console.log("Post:", post.id);
+  
+  }
+  // Check if there's a next page
+  const hasMore = feedPosts.length > pageSize;
+  console.log("Feed posts has more:", hasMore);
+
+  // If we got more than pageSize items, remove the extra one before returning
+  if (hasMore) {
+    feedPosts.pop();
+  }
+
+  return { posts: feedPosts, hasMore, pageSize };
 }
 
 export async function createPost({

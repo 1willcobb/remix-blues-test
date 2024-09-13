@@ -17,6 +17,7 @@ export default function Post({
   content,
   likes,
   comments,
+  votes,
   createdAt,
 }) {
   const fetcher = useFetcher();

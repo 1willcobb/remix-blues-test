@@ -80,7 +80,7 @@ export default function Index() {
               <div className="mx-auto inline-grid grid-cols-2 gap-5 space-y-0">
                 <NavLink
                   prefetch="viewport"
-                  to="/explore/comingsoon"
+                  to="/friends"
                   className="btn btn-neutral"
                 >
                   See Submissions
