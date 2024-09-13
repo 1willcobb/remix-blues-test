@@ -31,9 +31,15 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const caption = formData.get("caption") as string | null;
   const file = formData.get("file") as File; // Directly get the file
+  const lens = formData.get("lens") as string | null;
+  const filmStock = formData.get("filmStock") as string | null;
+  const camera = formData.get("camera") as string | null;
+  const settings = formData.get("settings") as string | null;
 
   console.log("Caption IN ACTION:", caption);
   console.log("File IN ACTION:", file);
+
+  console.log("camera ON ACTION", camera);
 
   if (!file || !(file instanceof File)) {
     return json(
@@ -48,9 +54,13 @@ export const action: ActionFunction = async ({ request }) => {
       content: caption || "",
       imageUrl: mediaUrl,
       userId: user.id,
+      lens,
+      filmStock,
+      camera,
+      settings,
     });
     console.log("Post created:", post);
-    return redirect(`/`);
+    return redirect(`/friends`);
   } catch (error) {
     console.error("Error creating post:", error);
     return json({ error: "Internal server error" }, { status: 500 });
@@ -62,7 +72,14 @@ export default function Upload() {
   const { id } = useParams();
   const { user } = useLoaderData();
   const [caption, setCaption] = useState<string>("");
+  const [lens, setLens] = useState<string>("");
+  const [settings, setSettings] = useState<string>("");
+  const [filmStock, setFilmStock] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [camera, setCamera] = useState<string>("");
+
   const [loading, setLoading] = useState(false);
+  const [moreData, setMoreData] = useState(false);
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
   const [compressedFile, setCompressedFile] = useState<File | null>(null);
   const navigate = useNavigate();
@@ -73,6 +90,34 @@ export default function Upload() {
     event: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     setCaption(event.target.value);
+  };
+
+  const handleLensChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLens(event.target.value);
+  };
+
+  const handleSettingsChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setSettings(event.target.value);
+  };
+
+  const handleFilmStockChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setFilmStock(event.target.value);
+  };
+
+  const handleLocationChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setLocation(event.target.value);
+  };
+
+  const handleCameraChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setCamera(event.target.value);
   };
 
   // Handle file change and compression
@@ -120,6 +165,11 @@ export default function Upload() {
 
     const formData = new FormData();
     formData.append("caption", caption);
+    formData.append("lens", lens);
+    formData.append("camera", camera); // Append camera
+    formData.append("location", location); // Append location
+    formData.append("filmStock", filmStock); // Append filmStock
+    formData.append("settings", settings); // Append settings
     formData.append("file", compressedFile); // Append the actual file
 
     try {
@@ -189,10 +239,82 @@ export default function Upload() {
             onSubmit={handleSubmit}
             className="flex flex-col items-center justify-center w-full gap-3"
           >
-            <label htmlFor="camera" className="text-left">
-              Camera
-            </label>
-            <input type="text" name="camera" placeholder="Mamiya 7ii" />
+            <ul className="w-full ">
+              <li className="w-full grid grid-cols-6">
+                <label htmlFor="camera" className="text-left col-span-2">
+                  Camera
+                </label>
+                <input
+                  className="col-span-4"
+                  type="text"
+                  name="camera"
+                  placeholder="Mamiya 7ii"
+                  value={camera}
+                  onChange={handleCameraChange}
+                />
+              </li>
+              {moreData ? (
+                <ul className="w-full">
+                  <li className="w-full grid grid-cols-6">
+                    <label htmlFor="filmStock" className="text-left col-span-2">
+                      Film Stock
+                    </label>
+                    <input
+                      className="col-span-4"
+                      type="text"
+                      name="filmStock"
+                      placeholder="Portra 800"
+                      value={filmStock}
+                      onChange={handleFilmStockChange}
+                    />
+                  </li>
+                  <li className="w-full grid grid-cols-6">
+                    <label htmlFor="lens" className="text-left col-span-2">
+                      Lens
+                    </label>
+                    <input
+                      className="col-span-4"
+                      type="text"
+                      name="lens"
+                      placeholder="80mm 1.4"
+                      value={lens}
+                      onChange={handleLensChange}
+                    />
+                  </li>
+                  <li className="w-full grid grid-cols-6">
+                    <label htmlFor="location" className="text-left col-span-2">
+                      Location
+                    </label>
+                    <input
+                      className="col-span-4"
+                      type="text"
+                      name="location"
+                      placeholder="San Luis Obispo"
+                      value={location}
+                      onChange={handleLocationChange}
+                    />
+                  </li>
+                  <li className="w-full grid grid-cols-6">
+                    <label htmlFor="settings" className="text-left col-span-2">
+                      Settings
+                    </label>
+                    <input
+                      className="col-span-4"
+                      type="text"
+                      name="settings"
+                      value={settings}
+                      onChange={handleSettingsChange}
+                      placeholder="Shutter 1/800"
+                    />
+                  </li>
+                </ul>
+              ) : (
+                <button type="button" onClick={() => setMoreData(true)}>
+                  More Meta Data
+                </button>
+              )}
+            </ul>
+
             <label htmlFor="caption" className="text-left">
               Caption
             </label>
@@ -207,7 +329,7 @@ export default function Upload() {
             <input type="hidden" name="creatorUsername" value={user.username} />
 
             <div className="grid grid-cols-2 gap-4 w-full">
-              <Link to="/explore/comingsoon" className="btn btn-outline">
+              <Link to="/friends" className="btn btn-outline">
                 Cancel
               </Link>
 

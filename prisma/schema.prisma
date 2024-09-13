@@ -92,7 +92,6 @@ model Like {
 
 model Vote {
   id        String   @id @default(uuid())
-  value     Int
   createdAt DateTime @default(now())
   userId    String
   postId    String

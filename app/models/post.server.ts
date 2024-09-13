@@ -49,7 +49,7 @@ export async function getUserFeed(
     take: pageSize + 1, // Fetch one more than needed to check if there's a next page
   });
 
-  for (let post of feedPosts) {
+  for (const post of feedPosts) {
     console.log("Post:", post.id);
   
   }
@@ -69,14 +69,27 @@ export async function createPost({
   content,
   imageUrl,
   userId,
+  lens,
+  filmStock,
+  camera,
+  settings,
 }: {
   content: string;
-  imageUrl?: string;
+  imageUrl: string;
   userId: string;
+  lens?: string;
+  filmStock?: string;
+  camera?: string;
+  settings?: string;
 }): Promise<Post> {
   console.log("Creating post for user:", userId);
   console.log("Content:", content);
   console.log("Image URL:", imageUrl);
+  console.log(lens)
+  console.log(filmStock)
+  console.log(camera)
+  console.log(settings)
+
 
   try {
     const post = await prisma.post.create({
@@ -86,6 +99,10 @@ export async function createPost({
         user: {
           connect: { id: userId },
         },
+        lens,
+        filmStock,
+        camera,
+        settings
       },
       include: {
         user: true,

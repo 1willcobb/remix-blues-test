@@ -1,9 +1,52 @@
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { useRouteLoaderData, useFetcher } from "@remix-run/react";
 
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import Post from "~/components/Post";
+
+import { getUserId } from "~/session.server";
+import { createLike, deleteLike, hasUserLiked } from "~/models/like.server";
+import { createVote, deleteVote, hasUserVoted } from "~/models/vote.server";
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+
+  const userId = await getUserId(request);
+
+  const like = formData.get("like");
+  const vote = formData.get("vote");
+  const postId = formData.get("postId");
+
+  console.log("like", like);
+  console.log("postId", postId);
+  console.log("vote", vote);
+
+  if (like) {
+    console.log("like found");
+    const userLiked = await hasUserLiked({ userId, postId });
+    if (!userLiked) {
+      await createLike({ userId, postId });
+    } else {
+      console.log("deleting like on action");
+      await deleteLike(userId, postId);
+    }
+  }
+
+  if (vote) {
+    console.log("vote found");
+    const userVoted = await hasUserVoted({ userId, postId });
+    if (!userVoted) {
+      await createVote({ userId, postId });
+    } else {
+      console.log("deleting vote on action");
+      await deleteVote(userId, postId);
+    }
+  }
+
+  return null;
+};
 
 export default function FriendsFeedSourced() {
   const data = useRouteLoaderData("routes/friends");
@@ -64,19 +107,7 @@ export default function FriendsFeedSourced() {
         className="max-w-2xl flex flex-col mx-auto w-full items-center"
       >
         {allPosts.map((post) => (
-          <div key={post.id}>
-            <Post
-              key={post.id}
-              mediaUrl={post.imageUrl}
-              id={post.id}
-              username={post.creatorUsername}
-              content={post.content}
-              likes={post.likeCount}
-              comments={post.commentCount}
-              votes={post.voteCount}
-              createdAt={post.createdAt}
-            />
-          </div>
+          <Post key={post.id} post={post} />
         ))}
       </InfiniteScroll>
     </div>
