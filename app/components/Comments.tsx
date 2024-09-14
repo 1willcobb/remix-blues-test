@@ -8,7 +8,7 @@ interface CommentsProps {
   entityType: "blog" | "post"; // Specify whether it's a blog or post
 };
 
-export function Comments({ comments, entityId, userId, entityType }: CommentsProps) {
+export default function Comments({ comments, entityId, userId, entityType }: CommentsProps) {
   const fetcher = useFetcher();
 
   return (
@@ -64,6 +64,7 @@ export function Comments({ comments, entityId, userId, entityType }: CommentsPro
         <input type="hidden" name="_action" value="addComment" />
         <textarea name="content" placeholder="Add a comment..." required />
         <input type="hidden" name={`${entityType}Id`} value={entityId} />
+        <input type="hidden" name="newComment" value="newComment" />
         <button type="submit">Submit</button>
       </fetcher.Form>
     </div>

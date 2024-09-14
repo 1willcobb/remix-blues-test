@@ -95,17 +95,28 @@ export function extractIdfromFullId(id: string): string {
 }
 
 export function dateConverter(createdAt: string) {
-  // Convert the string to a Date object
-  const date = new Date(createdAt);
+  try {
+    // Convert the string to a Date object
+    const date = new Date(createdAt);
 
-  // Check if the conversion was successful
-  if (!isNaN(date.getTime())) {
-    const options = { year: 'numeric', month: 'long', day: '2-digit' };
+    // Check if the conversion was successful (valid date)
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date format");
+    }
+
+    // Format the date as 'Month day, year' (e.g., August 22, 2024)
+    const options: Intl.DateTimeFormatOptions = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: '2-digit',
+    };
+
     const formattedDate = date.toLocaleDateString('en-US', options);
 
     return formattedDate;
-  } else {
-    console.error("Invalid date format");
+  } catch (error) {
+    console.error(error.message);
+    return null;
   }
 }
 

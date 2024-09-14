@@ -4,13 +4,18 @@ import { useRouteLoaderData, useFetcher } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
+import { loadCommentsForEntity } from "~/utils/comments.server";
+
 import Post from "~/components/Post";
+
+import { handleCommentActions } from "~/utils/comments.server";
 
 import { getUserId } from "~/session.server";
 import { createLike, deleteLike, hasUserLiked } from "~/models/like.server";
 import { createVote, deleteVote, hasUserVoted } from "~/models/vote.server";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+
+export const action = async ({ request, params }: ActionFunctionArgs) => {
   const formData = await request.formData();
 
   const userId = await getUserId(request);
@@ -18,10 +23,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const like = formData.get("like");
   const vote = formData.get("vote");
   const postId = formData.get("postId");
+  const newComment = formData.get("newComment");
 
-  console.log("like", like);
-  console.log("postId", postId);
-  console.log("vote", vote);
+  //!! There is a problem loading comments if they exist. look at blog and how that works. 
+  if (newComment) {
+    await handleCommentActions(request, postId, "post", formData);
+    return null;
+  }
+
+  // console.log("like", like);
+  // console.log("postId", postId);
+  // console.log("vote", vote);
 
   if (like) {
     console.log("like found");
@@ -107,7 +119,7 @@ export default function FriendsFeedSourced() {
         className="max-w-2xl flex flex-col mx-auto w-full items-center"
       >
         {allPosts.map((post) => (
-          <Post key={post.id} post={post} />
+          <Post key={post.id} post={post} userId={data.userId} />
         ))}
       </InfiniteScroll>
     </div>

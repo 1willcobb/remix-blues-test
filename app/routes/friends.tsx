@@ -19,7 +19,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     post.userVoted = await hasUserVoted({ userId, postId: post.id });
   }
 
-  return { posts, hasMore, pageSize, hasNextPage: posts.length === pageSize };
+  return { posts, hasMore, pageSize, hasNextPage: posts.length === pageSize, userId };
 };
 
 export default function FriendsFeed() {

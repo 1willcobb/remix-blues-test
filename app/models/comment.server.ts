@@ -13,33 +13,67 @@ export async function createComment({
   postId?: string;
   blogId?: string;
 }): Promise<Comment> {
-  const comment = await prisma.comment.create({
-    data: {
-      content,
-      user: { connect: { id: userId } },
-      post: postId ? { connect: { id: postId } } : undefined,
-      blog: blogId ? { connect: { id: blogId } } : undefined,
-    },
-    include: {
-      user: true,
-      post: true,
-      blog: true,
-    },
-  });
-
-  if (postId) {
-    await prisma.post.update({
-      where: { id: postId },
-      data: { commentCount: { increment: 1 } },
-    });
-  } else if (blogId) {
-    await prisma.blog.update({
-      where: { id: blogId },
-      data: { commentCount: { increment: 1 } },
-    });
+  // Check if either postId or blogId is provided
+  if (!postId && !blogId) {
+    throw new Error("Either postId or blogId must be provided.");
   }
 
-  return comment;
+  // Ensure the blogId exists before creating the comment
+  if (blogId) {
+    const blogExists = await prisma.blog.findUnique({
+      where: { id: blogId },
+    });
+
+    if (!blogExists) {
+      throw new Error("Blog not found.");
+    }
+  }
+
+  // Ensure the postId exists before creating the comment
+  if (postId) {
+    const postExists = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!postExists) {
+      throw new Error("Post not found.");
+    }
+  }
+
+  try {
+    // Create the comment
+    const comment = await prisma.comment.create({
+      data: {
+        content,
+        user: { connect: { id: userId } },
+        post: postId ? { connect: { id: postId } } : undefined,
+        blog: blogId ? { connect: { id: blogId } } : undefined,
+      },
+      include: {
+        user: true,
+        post: true,
+        blog: true,
+      },
+    });
+
+    // Increment commentCount in the respective entity (post or blog)
+    if (postId) {
+      await prisma.post.update({
+        where: { id: postId },
+        data: { commentCount: { increment: 1 } },
+      });
+    } else if (blogId) {
+      await prisma.blog.update({
+        where: { id: blogId },
+        data: { commentCount: { increment: 1 } },
+      });
+    }
+
+    return comment;
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    throw new Error("Failed to create comment.");
+  }
 }
 
 export async function getCommentsByEntity({

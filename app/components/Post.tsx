@@ -7,9 +7,16 @@ import {
   RiThumbUpLine,
   RiThumbUpFill,
 } from "react-icons/ri";
+import { useState } from "react";
 
-export default function Post(post) {
+import { dateConverter } from "~/utils";
+
+import Comments from "./Comments";
+
+export default function Post(post, userId) {
   const fetcher = useFetcher();
+  const [showFullContent, setShowFullContent] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const {
     id,
@@ -23,14 +30,13 @@ export default function Post(post) {
     userLiked,
     userVoted,
     camera,
+    comments,
   } = post.post;
 
-  console.log(post.post)
-
   return (
-    <div className="p-3 flex flex-col justify-center">
+    <div className="p-3 flex flex-col justify-center gap-2">
       <img src={imageUrl} alt={content} className=" shadow-xl" />
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
         <fetcher.Form
           method="post"
           className="flex gap-4 p-1 px-3 items-center"
@@ -65,16 +71,24 @@ export default function Post(post) {
           <input type="hidden" name="postId" value={id} />
           <input type="hidden" name="comment" value="comment" />
           {commentCount === 0 ? (
-            <button>
-              <RiChat3Line className="size-6" />
+            <button onClick={() => setShowComments(!showComments)}>
+              {showComments ? (
+                <RiChat3Fill className="size-6" />
+              ) : (
+                <RiChat3Line className="size-6" />
+              )}
             </button>
           ) : (
             <div className="indicator">
               <span className="indicator-item badge badge-ghost">
                 {commentCount}
               </span>
-              <button>
-                <RiChat3Line className="size-6" />
+              <button onClick={() => setShowComments(!showComments)}>
+                {showComments ? (
+                  <RiChat3Fill className="size-6" />
+                ) : (
+                  <RiChat3Line className="size-6" />
+                )}
               </button>
             </div>
           )}
@@ -84,7 +98,7 @@ export default function Post(post) {
           <input type="hidden" name="vote" value="vote" />
           {voteCount === 0 ? (
             <button className="flex items-center gap-1 border-2 p-1 rounded-xl">
-              <RiThumbUpLine className="size-5" />
+              <RiThumbUpLine className="size-4" />
               <p>vote</p>
             </button>
           ) : (
@@ -93,13 +107,13 @@ export default function Post(post) {
                 {voteCount}
               </span>
               {userVoted ? (
-                <button className="flex items-center gap-1 border-2 p-1 rounded-xl ">
-                  <RiThumbUpLine className="size-5" />
+                <button className="flex items-center gap-1 border-2 p-1 rounded-xl bg-green-200">
+                  <RiThumbUpFill className="size-4" />
                   <p>vote</p>
                 </button>
               ) : (
                 <button className="flex items-center gap-1 border-2 p-1 rounded-xl">
-                  <RiThumbUpLine className="size-5 " />
+                  <RiThumbUpLine className="size-4 " />
                   <p>vote</p>
                 </button>
               )}
@@ -110,7 +124,7 @@ export default function Post(post) {
 
       <div className="flex flex-col px-3">
         <div className="flex ">
-          <h2>
+          <div>
             <NavLink
               prefetch="intent"
               to={`/${user.username}`}
@@ -118,19 +132,32 @@ export default function Post(post) {
             >
               {user.displayName}
             </NavLink>
+            <p className="text-xs font-thin">{dateConverter(createdAt)}</p>
             <p>{camera}</p>
-            <p>{content}</p>
-          </h2>
+            <p>
+              {content.length > 100 && !showFullContent
+                ? `${content.substring(0, 100)}...`
+                : content}
+            </p>
+            {content.length > 100 ? (
+              <button
+                onClick={() => setShowFullContent(!showFullContent)}
+                className="text-teal-400"
+              >
+                {showFullContent ? "less" : "more"}
+              </button>
+            ) : null}
+          </div>
         </div>
-        <p className="text-xs font-thin">{createdAt}</p>
 
-        {/* <ul>
-          {comments.map((id) => (
-            <li key={id}>
-              <p>{id}</p>
-            </li>
-          ))}
-        </ul> */}
+        {showComments ? (
+          <Comments
+            comments={comments}
+            entityId={id}
+            userId={userId}
+            entityType="post"
+          />
+        ) : null}
       </div>
     </div>
   );
