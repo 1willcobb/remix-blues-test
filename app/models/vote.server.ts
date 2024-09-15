@@ -81,7 +81,7 @@ export async function hasUserVoted({
   userId: string;
   postId: string;
 }): Promise<boolean> {
-  console.log("checking if voted")
+  // console.log("checking if voted")
   const vote = await prisma.vote.findFirst({
     where: {
       userId: userId,
@@ -90,10 +90,10 @@ export async function hasUserVoted({
   });
 
   if (!vote) {
-    console.log("false")
+    // console.log("false")
     return false;
   }
 
-  console.log("true")
+  // console.log("true")
   return true;
 }

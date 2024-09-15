@@ -1,104 +1,146 @@
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useEffect, useState } from "react";
 import {
-  useLoaderData,
+  Link,
+  useRouteLoaderData,
+  useNavigate,
   useFetcher,
   useParams,
-  isRouteErrorResponse,
-  useRouteError,
-  useNavigate,
 } from "@remix-run/react";
-import { LoaderFunctionArgs } from "@remix-run/node";
-import { getPostById } from "~/models/post.server";
-import { requireUserId } from "~/session.server";
-
+import { useState, useEffect, useCallback, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Post from "~/components/Post";
-import invariant from "tiny-invariant";
 
-import { RiArrowLeftSFill, RiArrowRightSFill } from "react-icons/ri";
-
-import ErrorBoundaryGeneral from "~/components/ErrorBoundaryGeneral";
-
-export const meta: MetaFunction = () => {
-  return [
-    {
-      title: `MyFilmFriends`,
-      description: "A community for photography lovers.",
-    },
-  ];
-};
-
-export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  const userId = await requireUserId(request);
-
-  const post = await getPostById(params.postid);
-  invariant(post, "Post not found");
-
-  return {
-    post,
-  };
-};
-
-export const action = async ({ request }: ActionFunctionArgs) => {
-  return null;
-};
-
-export default function FullScreenPost() {
-  const { post } = useLoaderData();
-  const navigate = useNavigate();
+export default function UserIndex() {
+  const { posts, friend, pageSize, hasNextPage, userId } =
+    useRouteLoaderData("routes/$username");
 
   const fetcher = useFetcher();
+  const params = useParams(); // Get the postId from URL params
 
-  console.log("Post:", post);
+  const [allPosts, setAllPosts] = useState(posts);
+  const [hasMore, setHasMore] = useState(hasNextPage);
+  const [page, setPage] = useState(1);
+  const [isFetching, setIsFetching] = useState(false); // Prevent race conditions during fetching
+  const [targetPostId, setTargetPostId] = useState(null); // Initialize with null
+
+  const observerRef = useRef(null); // Ref to store the intersection observer instance
+
+  // Fetch more data (for pagination)
+  const fetchMoreData = useCallback(() => {
+    if (isFetching) return; // Prevent multiple fetches at the same time
+    setIsFetching(true); // Set fetching state to true
+
+    setPage((prevPage) => {
+      const nextPage = prevPage + 1;
+
+      // Construct the URL with search params
+      const params = new URLSearchParams();
+      params.append("page", nextPage.toString());
+      params.append("pageSize", pageSize.toString());
+
+      fetcher.load(`/${friend.username}/?${params.toString()}`); // Load new data for the next page
+      return nextPage;
+    });
+  }, [friend.username, pageSize, isFetching, fetcher]);
+
+  // Handle fetched data
+  useEffect(() => {
+    if (fetcher.data && fetcher.data.posts) {
+      setAllPosts((prevPosts) => [...prevPosts, ...fetcher.data.posts]);
+      setHasMore(fetcher.data.hasNextPage);
+      setIsFetching(false); // Reset fetching state
+    }
+  }, [fetcher.data]);
+
+  // Set target postId from params only after the component has mounted
+  useEffect(() => {
+    if (params.postid) {
+      setTargetPostId(params.postid); // Set the target postId from URL params
+    }
+  }, [params.postid]);
+
+  // Handle reset of posts on username change
+  useEffect(() => {
+    setAllPosts(posts); // Reset posts to initial data
+    setPage(1); // Reset the page number
+    setHasMore(hasNextPage); // Reset hasMore based on initial load
+  }, [friend.username, posts, hasNextPage]);
+
+  // Handle scrolling to the post when it becomes visible
+  useEffect(() => {
+    if (targetPostId && allPosts.some((post) => post.id === targetPostId)) {
+      // The post is now visible, scroll to it
+      const element = document.querySelector(
+        `[data-post-id="${targetPostId}"]`
+      );
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        setTargetPostId(null); // Clear the target postId after scrolling
+      }
+    }
+  }, [targetPostId, allPosts]);
+
+  // Keep fetching data if target post is not loaded yet
+  useEffect(() => {
+    if (
+      targetPostId &&
+      !allPosts.some((post) => post.id === targetPostId) &&
+      hasMore &&
+      !isFetching // Ensure fetching is not happening simultaneously
+    ) {
+      fetchMoreData(); // Fetch more data until the post is loaded
+    }
+  }, [targetPostId, allPosts, hasMore, fetchMoreData, isFetching]);
+
+  // Update the URL when a post is in view using IntersectionObserver
+  useEffect(() => {
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const postId = entry.target.getAttribute("data-post-id");
+              if (postId) {
+                // Update the URL without reloading the page
+                window.history.replaceState(null, "", `/${friend.username}/${postId}`);
+              }
+            }
+          });
+        },
+        {
+          threshold: 0.5, // Trigger when 50% of the post is visible
+        }
+      );
+    }
+
+    // Observe all posts
+    const postElements = document.querySelectorAll("[data-post-id]");
+    postElements.forEach((element) => {
+      observerRef.current.observe(element);
+    });
+
+    return () => {
+      // Cleanup the observer when the component unmounts
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [allPosts, friend.username]);
 
   return (
-    <dialog id="my_modal_1" className="modal">
-      <div className="modal-box flex p-0 h-full max-w-full">
-        <fetcher.Form
-          method="post"
-          className="flex justify-center bg-slate-300 bg-opacity-20 hover:bg-opacity-60  hover:text-white w-1/12 py-52 rounded-r-full sm:rounded-full"
-        >
-          <button type="submit">
-            <RiArrowLeftSFill className="size-16 " />
-          </button>
-        </fetcher.Form>
-        <Post
-          mediaUrl={post.imageUrl}
-          id={post.id}
-          content={post.content}
-          username={post.user.username}
-          createdAt={post.createdAt}
-          likes={post.likeCount}
-          comments={post.commentCount}
-        />
-
-        <fetcher.Form
-          method="post"
-          className="flex justify-center bg-slate-300 bg-opacity-20 hover:bg-opacity-60  hover:text-white w-1/12 py-52 rounded-l-full sm:rounded-full"
-        >
-          <button type="submit">
-            <RiArrowRightSFill className="size-16 " />
-          </button>
-        </fetcher.Form>
-        <form method="dialog">
-          {/* if there is a button in form, it will close the modal */}
-          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-            ✕
-          </button>
-        </form>
-      </div>
-      <form method="dialog" className="modal-backdrop" >
-        <button>close</button>
-      </form>
-    </dialog>
+    <InfiniteScroll
+      className="grid grid-cols-1 gap-1 max-w-2xl mx-auto z-0"
+      dataLength={allPosts.length}
+      next={fetchMoreData}
+      hasMore={hasMore} // Use hasMore to control if more posts should be loaded
+      loader={<div className="skeleton size-full"></div>}
+    >
+      <ul>
+        {allPosts.map((post) => (
+          <li key={post.id} data-post-id={post.id}>
+            <Post post={post} userId={userId} />
+          </li>
+        ))}
+      </ul>
+    </InfiniteScroll>
   );
-}
-
-export function ErrorBoundary() {
-  const error = useRouteError();
-  if (isRouteErrorResponse(error)) {
-    return <ErrorBoundaryGeneral page="user index" />;
-  }
-  return <ErrorBoundaryGeneral page="user index" />;
 }

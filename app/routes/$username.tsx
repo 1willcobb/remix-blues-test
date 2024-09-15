@@ -20,8 +20,6 @@ import { getUserByUsername } from "~/models/user.server";
 import { requireUserId } from "~/session.server";
 import { getUserPosts } from "~/models/post.server";
 
-import FriendHeader from "~/components/FriendHeader";
-
 import {
   followUser,
   unfollowUser,
@@ -29,6 +27,9 @@ import {
 } from "~/models/userFollow.server";
 
 import InfiniteScroll from "react-infinite-scroll-component";
+
+import { hasUserLiked } from "~/models/like.server";
+import { hasUserVoted } from "~/models/vote.server";
 
 import { useState, useEffect } from "react";
 import invariant from "tiny-invariant";
@@ -58,6 +59,11 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // Fetch user's posts with pagination
   const posts = await getUserPosts(friend.id, page, pageSize);
 
+  for (const post of posts) {
+    post.userLiked = await hasUserLiked({ userId, postId: post.id });
+    post.userVoted = await hasUserVoted({ userId, postId: post.id });
+  }
+
   // console.log("Posts:", posts);
 
   // Check if the user is following the friend
@@ -68,6 +74,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   );
 
   return {
+    userId,
     posts,
     friend,
     isFollowing,
@@ -104,61 +111,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function UserPage() {
-  const { posts, friend, isFollowing, pageSize, hasNextPage } = useLoaderData();
-
-  const fetcher = useFetcher();
-  const [allPosts, setAllPosts] = useState(posts);
-  const [hasMore, setHasMore] = useState(hasNextPage);
-  const [page, setPage] = useState(1);
-  const navigate = useNavigate();
-
-  // console.log("Main posts", posts);
-
-  const fetchMoreData = () => {
-    setPage((prevPage) => {
-      const nextPage = prevPage + 1;
-
-      // Construct the URL with search params
-      const params = new URLSearchParams();
-      params.append("page", nextPage.toString());
-      params.append("pageSize", pageSize.toString());
-
-      fetcher.load(`/${friend.username}/?${params.toString()}`); // Load new data for the next page
-      return nextPage;
-    });
-  };
-
-  useEffect(() => {
-    console.log("Fetcher data", fetcher.data);
-    if (fetcher.data && fetcher.data.posts) {
-      console.log("Fetcher data", fetcher.data);
-      setAllPosts((prevPosts) => [...prevPosts, ...fetcher.data.posts]);
-      setHasMore(fetcher.data.hasNextPage); // Update the hasMore state based on new data
-    }
-  }, [fetcher.data]);
-
-  useEffect(() => {
-    setAllPosts(posts); // Reset posts to initial data
-    setPage(1); // Reset the page number
-    setHasMore(hasNextPage); // Reset hasMore based on initial load
-  }, [friend.username, posts, hasNextPage]);
-
-  const openModal = (postId) => {
-    console.log("Opening modal", postId);
-    navigate(`/${friend.username}/${postId}`);
-  };
+  const { friend } = useLoaderData();
 
   return (
     <main className="flex flex-col min-h-screen">
       <Header friendUsername={friend.username} />
       <div className=" flex flex-col flex-grow">
-        <section className="bg-white w-full h-full flex flex-col z-10 ">
-          <FriendHeader
-            friend={friend}
-            isFollowing={isFollowing}
-          />
-          <Outlet />
-        </section>
+        <Outlet />
       </div>
       <ControlBar />
     </main>

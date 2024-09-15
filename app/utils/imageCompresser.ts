@@ -2,16 +2,16 @@
 import imageCompression from "browser-image-compression";
 
 export async function compressFile(file) {
-  console.log("Compressing file:", file);
+  // console.log("Compressing file:", file);
   const options = {
     maxSizeMB: 0.75,
-    maxWidthOrHeight: 800,
+    maxWidthOrHeight: 1920,
     useWebWorker: true,
   };
 
   try {
     const compressedBlob = await imageCompression(file, options);
-    console.log("Compressed file:", compressedBlob);
+    // console.log("Compressed file:", compressedBlob);
 
     if (compressedBlob.size === 0) {
       throw new Error("Compressed file is empty.");

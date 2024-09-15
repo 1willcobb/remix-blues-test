@@ -6,6 +6,8 @@ import {
 } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+
+import FriendHeader from "~/components/FriendHeader";
 export default function UserIndex() {
   const { posts, friend, isFollowing, pageSize, hasNextPage } =
     useRouteLoaderData("routes/$username");
@@ -14,7 +16,6 @@ export default function UserIndex() {
   const [allPosts, setAllPosts] = useState(posts);
   const [hasMore, setHasMore] = useState(hasNextPage);
   const [page, setPage] = useState(1);
-  const navigate = useNavigate();
 
   const fetchMoreData = () => {
     setPage((prevPage) => {
@@ -45,31 +46,30 @@ export default function UserIndex() {
     setHasMore(hasNextPage); // Reset hasMore based on initial load
   }, [friend.username, posts, hasNextPage]);
 
-  const openModal = (postId) => {
-    console.log("Opening modal", postId);
-    navigate(`/${friend.username}/${postId}`);
-  };
   return (
-    <InfiniteScroll
-      className="grid grid-cols-3 gap-1 max-w-2xl mx-auto z-0"
-      dataLength={allPosts.length}
-      next={fetchMoreData}
-      hasMore={hasMore} // Use hasMore to control if more posts should be loaded
-      loader={<div className="skeleton size-full"></div>}
-    >
-      {allPosts.map((post) => (
-        <Link
-          to={`${post.id}`}
-          key={`${post.id}_allposts`}
-          className="relative overflow-hidden pb-full z-0"
-        >
-          <img
-            src={post.imageUrl}
-            alt={post.caption}
-            className="absolute inset-0 w-full h-full object-cover z-0"
-          />
-        </Link>
-      ))}
-    </InfiniteScroll>
+    <section className="bg-white w-full h-full flex flex-col z-10 ">
+      <FriendHeader friend={friend} isFollowing={isFollowing} />
+      <InfiniteScroll
+        className="grid grid-cols-3 gap-1 max-w-2xl mx-auto z-0"
+        dataLength={allPosts.length}
+        next={fetchMoreData}
+        hasMore={hasMore} // Use hasMore to control if more posts should be loaded
+        loader={<div className="skeleton size-full"></div>}
+      >
+        {allPosts.map((post) => (
+          <Link
+            to={`${post.id}`}
+            key={`${post.id}_allposts`}
+            className="relative overflow-hidden pb-full z-0"
+          >
+            <img
+              src={post.imageUrl}
+              alt={post.caption}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+            />
+          </Link>
+        ))}
+      </InfiniteScroll>
+    </section>
   );
 }

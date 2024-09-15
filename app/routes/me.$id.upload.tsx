@@ -60,7 +60,7 @@ export const action: ActionFunction = async ({ request }) => {
       settings,
     });
     console.log("Post created:", post);
-    return redirect(`/friends`);
+    return redirect(`/${user.username}`);
   } catch (error) {
     console.error("Error creating post:", error);
     return json({ error: "Internal server error" }, { status: 500 });
@@ -186,7 +186,7 @@ export default function Upload() {
         throw new Error("Failed to upload");
       }
 
-      navigate(`/explore`);
+      navigate(`/${user.username}`);
     } catch (error) {
       console.error("Error submitting form:", error);
       setLoading(false);
@@ -329,7 +329,11 @@ export default function Upload() {
             <input type="hidden" name="creatorUsername" value={user.username} />
 
             <div className="grid grid-cols-2 gap-4 w-full">
-              <Link to="/friends" className="btn btn-outline">
+              <Link
+                to="#"
+                className="btn btn-outline"
+                onClick={() => navigate(-1)}
+              >
                 Cancel
               </Link>
 
