@@ -6,6 +6,18 @@ import {
 } from "~/utils/comments.server";
 import Comments from "~/components/Comments";
 
+import { MDXProvider } from "@mdx-js/react";
+
+import { ClientOnly } from "remix-utils/client-only";
+
+import {
+  MDXEditor,
+  headingsPlugin,
+  listsPlugin,
+  linkPlugin,
+  quotePlugin
+} from "~/components/editor.client";
+
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   return loadCommentsForEntity(params.id, "blog", request);
 };
@@ -27,9 +39,22 @@ export default function BlogPost() {
       <h1>{blog.title}</h1>
       <p>by {blog.author.username}</p>
       <p>{new Date(blog.createdAt).toLocaleDateString()}</p>
-      <div>
-        <p>{blog.content}</p>
-      </div>
+      <ClientOnly fallback={<p>Loading...</p>}>
+        {() => (
+          <MDXEditor
+            markdown={blog.content}
+            className="prose"
+            readOnly={true}
+            plugins={[
+              headingsPlugin(),
+              listsPlugin(),
+              linkPlugin(),
+              quotePlugin(),
+            ]}
+          />
+        )}
+      </ClientOnly>
+      <p>{blog.content}</p>
 
       <div>
         <Comments

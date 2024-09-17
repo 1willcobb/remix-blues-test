@@ -1,12 +1,45 @@
-import { Outlet } from "@remix-run/react";
+import React from "react";
+import { ClientOnly } from "remix-utils/client-only";
 
-export default function Blogp() {
+import {
+  MDXEditor,
+  headingsPlugin,
+  UndoRedo,
+  BoldItalicUnderlineToggles,
+  toolbarPlugin,
+  listsPlugin,
+  linkPlugin,
+  quotePlugin,
+  markdownShortcutPlugin,
+} from "~/components/editor.client";
+
+
+export default function Index() {
   return (
-    <div className="w-full px-4 max-w-2xl flex flex-col">
-      <h1 className="absolute top-[55px] text-2xl font-extrabold">Blog</h1>
-      <div className="prose max-w-xlg p-4 ">
-        <Outlet />
-      </div>
-    </div>
+    <ClientOnly fallback={<p>Loading...</p>}>
+      {() => (
+        <MDXEditor
+          markdown="# Hello world"
+          className="prose"
+          // readOnly={true}
+          plugins={[
+            headingsPlugin(),
+            listsPlugin(),
+            linkPlugin(),
+            quotePlugin(),
+            markdownShortcutPlugin(),
+            toolbarPlugin({
+              toolbarContents: () => (
+                <>
+                  {" "}
+                  <UndoRedo />
+                  <BoldItalicUnderlineToggles />
+                </>
+              ),
+            }),
+          ]}
+        />
+      )}
+    </ClientOnly>
   );
 }
