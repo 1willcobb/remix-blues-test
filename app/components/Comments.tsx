@@ -6,9 +6,14 @@ interface CommentsProps {
   entityId: string; // This could be blogId or postId
   userId: string;
   entityType: "blog" | "post"; // Specify whether it's a blog or post
-};
+}
 
-export default function Comments({ comments, entityId, userId, entityType }: CommentsProps) {
+export default function Comments({
+  comments,
+  entityId,
+  userId,
+  entityType,
+}: CommentsProps) {
   const fetcher = useFetcher();
 
   return (
@@ -22,13 +27,15 @@ export default function Comments({ comments, entityId, userId, entityType }: Com
             </p>
             <p>{new Date(comment.createdAt).toLocaleDateString()}</p>
             <div>
-              <fetcher.Form method="post">
-                <input type="hidden" name="_action" value="deleteComment" />
-                <input type="hidden" name="commentId" value={comment.id} />
-                <button type="submit" disabled={comment.userId !== userId}>
-                  Delete
-                </button>
-              </fetcher.Form>
+              {comment.userId === userId ? (
+                <fetcher.Form method="post">
+                  <input type="hidden" name="_action" value="deleteComment" />
+                  <input type="hidden" name="commentId" value={comment.id} />
+                  <button type="submit" disabled={comment.userId !== userId}>
+                    Delete
+                  </button>
+                </fetcher.Form>
+              ) : null}
               <fetcher.Form method="post">
                 <input
                   type="hidden"
@@ -39,7 +46,7 @@ export default function Comments({ comments, entityId, userId, entityType }: Com
                       : "likeComment"
                   }
                 />
-                {comment.likes?.some((like) => like.userId === userId) && (
+                {comment.likes?.some((like) => like.userId === userId) ? (
                   <input
                     type="hidden"
                     name="likeId"
@@ -47,7 +54,7 @@ export default function Comments({ comments, entityId, userId, entityType }: Com
                       comment.likes.find((like) => like.userId === userId)?.id
                     }
                   />
-                )}
+                ) : null}
                 <input type="hidden" name="commentId" value={comment.id} />
                 <button type="submit">
                   {comment.likes?.some((like) => like.userId === userId)

@@ -21,33 +21,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Blog() {
-  const { blogs, page, hasNextPage } = useLoaderData<typeof loader>();
-
   return (
     <main className="flex flex-col min-h-screen">
       <Header friendUsername={null} />
       <section className="flex flex-grow flex-col justify-center items-center">
-        <ul>
-          {blogs.map((blog) => (
-            <li key={blog.id}>
-              <h2>{blog.title}</h2>
-              <p>{blog.content}</p>
-              <Link to={`/blog/${blog.id}`} className="btn btn-sm btn-primary">Read More</Link>
-            </li>
-          ))}
-        </ul>
-        <div>
-          {page > 1 ? (
-            <Link to={`?page=${page - 1}`} className="button">
-              Previous
-            </Link>
-          ) : null}
-          {hasNextPage ? (
-            <Link to={`?page=${page + 1}`} className="button">
-              Next
-            </Link>
-          ) : null}
-        </div>
+        <Outlet />
       </section>
       <ControlBar />
     </main>

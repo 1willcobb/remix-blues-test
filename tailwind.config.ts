@@ -78,7 +78,7 @@ const config = {
       },
     },
   },
-  plugins: [ daisyui],
+  plugins: [ daisyui, require("@tailwindcss/typography") ],
   daisyui: {
     themes: [
       "light", "dark", "pastel", {
