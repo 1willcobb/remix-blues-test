@@ -56,7 +56,7 @@ export async function hasUserLiked({
   postId?: string;
   commentId?: string;
   blogId?: string;
-}): Promise<Like> {
+}): Promise<boolean> {
   const like = await prisma.like.findFirst({
     where: {
       userId: userId,
@@ -67,10 +67,10 @@ export async function hasUserLiked({
   });
 
   if (!like) {
-    return null;
+    return false;
   }
 
-  return like;
+  return true;
 }
 
 
@@ -134,7 +134,36 @@ export async function createLike({
 
 
 // Delete a like
-export async function deleteLike(likeId: string, postId?: string, commentId?: string, blogId?: string): Promise<Like> {
+export async function deleteLike(userId: string, postId?: string, commentId?: string, blogId?: string): Promise<Like> {
+
+  let likeId;
+  if (postId){
+    const like = await prisma.like.findFirst({
+      where: {
+        userId,
+        postId
+        
+      }
+    })
+    likeId = like.id
+  } else if (commentId) {
+    const like = await prisma.like.findFirst({
+      where: {
+        userId,
+        commentId
+      }
+    })
+    likeId = like.id
+  } else if (blogId) {
+    const like = await prisma.like.findFirst({
+      where: {
+        userId,
+        blogId
+      }
+    })
+    likeId = like.id
+  }
+
   const like = await prisma.like.delete({
     where: { id: likeId },
     include: {

@@ -2,7 +2,7 @@ import { Link } from "@remix-run/react";
 
 import dunes from "~/images/dunes.jpg";
 
-export default function ErrorBoundaryGeneral(page: string) {
+export default function ErrorBoundaryGeneral(page) {
   return (
     <div className="flex min-h-full flex-col justify-center">
       <div className="absolute h-screen md:inset-0">

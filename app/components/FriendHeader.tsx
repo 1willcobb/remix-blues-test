@@ -13,34 +13,31 @@ import { truncateText } from "~/utils";
 
 interface Props {
   friend: User;
-  count: UserCount;
   isFollowing: boolean;
 }
 
-export default function FriendHeader({ friend, count, isFollowing }: Props) {
+export default function FriendHeader({ friend, isFollowing }: Props) {
   const { user } = useRouteLoaderData("root");
 
-  const extractUserId = (id) => id.split("#")[1];
-
   return (
-    <section className="flex flex-col justify-center pt-1 p-3 gap-2">
+    <section className="flex flex-col pt-1 p-3 gap-2 w-full max-w-2xl mx-auto">
       <div className="flex items-center gap-2 ml-2">
         <img
-          src={friend?.profilePictureUrl}
+          src={friend?.profileImage}
           className="size-20 rounded-full object-cover"
           alt="user profile"
         />
         <div className="flex flex-grow justify-evenly ml-4">
           <NavLink to="stats/featured" className="flex flex-col items-center">
-            <p>{count?.featuredCount ?? 0}</p>
+            <p>{friend.featuredCount ?? 0}</p>
             <h3 className="font-bold">Featured</h3>
           </NavLink>
           <NavLink to="stats/followers" className="flex flex-col items-center">
-            <p>{count?.followerCount ?? 0}</p>
+            <p>{friend.followerCount ?? 0}</p>
             <h3 className="font-bold">Followers</h3>
           </NavLink>
           <NavLink to="stats/following" className="flex flex-col items-center">
-            <p>{count?.followingCount ?? 0}</p>
+            <p>{friend.followingCount ?? 0}</p>
             <h3 className="font-bold">Following</h3>
           </NavLink>
         </div>
@@ -49,27 +46,27 @@ export default function FriendHeader({ friend, count, isFollowing }: Props) {
         <h2 className="font-extrabold text-2xl">
           {truncateText(friend?.displayName || friend?.username, 20) ?? null}
         </h2>
-        {friend?.permissions === "superadmin" ? "⭐️" : " "}
+        {friend?.role === "superadmin" ? "⭐️" : " "}
       </div>
       <div>
         <p>{friend?.userBio ?? "No bio"}</p>
       </div>
-      {friend?.link?.url || friend.link?.altName ? (
+      {friend?.link || friend.linkAltName ? (
         <div>
           <Link
             to={
-              friend.link.url?.startsWith("http")
-                ? `${friend.link.url}`
-                : `https://${friend.link.url}`
+              friend.link?.startsWith("http")
+                ? `${friend.link}`
+                : `https://${friend.link}`
             }
             target="_blank"
             rel="noreferrer"
           >
             {" "}
             🔗{" "}
-            {friend.link.altName
-              ? truncateText(friend.link.altName, 50)
-              : friend.link.url}
+            {friend.linkAltName
+              ? truncateText(friend.linkAltName, 50)
+              : friend.link}
           </Link>
         </div>
       ) : null}
@@ -86,7 +83,7 @@ export default function FriendHeader({ friend, count, isFollowing }: Props) {
             </div>
           ) : user?.username === friend.username ? (
             <NavLink
-              to={`/me/${extractUserId(user.id)}`}
+              to={`/me/${user.id}`}
               type="submit"
               className="btn btn-outline w-full btn-sm"
             >
@@ -105,7 +102,7 @@ export default function FriendHeader({ friend, count, isFollowing }: Props) {
         </Form>
         {user?.username === friend.username ? (
           <NavLink
-            to={`/me/${extractUserId(user.id)}/messages`}
+            to={`/me/${user.id}/messages`}
             className="btn btn-outline w-full btn-sm"
           >
             Messages

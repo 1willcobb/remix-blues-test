@@ -5,7 +5,6 @@ import {
   RiMessage2Fill,
   RiMessage2Line,
 } from "react-icons/ri";
-import { extractUserIdFromFullId } from "../utils";
 
 import config from "~/config";
 
@@ -26,11 +25,7 @@ export default function Header({ friendUsername }: HeaderProps) {
     return currentPath.includes(path);
   };
 
-  let userId = null;
-  if (user) {
-    // console.log("user on header  " + JSON.stringify(user, null, 2));
-    userId = extractUserIdFromFullId(user.id);
-  }
+  const userId = user.id
 
   return (
     <header className="sticky left-0 right-0 top-0 z-50 bg-white h-[53px]">
@@ -57,14 +52,14 @@ export default function Header({ friendUsername }: HeaderProps) {
           </Link>
         </div>
         <div className="flex gap-4">
-          <Link prefetch="viewport" to="/announcements">
-            {isActive("announcements") ? (
+          <Link to="/blog">
+            {isActive("blog") ? (
               <RiMegaphoneFill className="size-6" />
             ) : (
               <RiMegaphoneLine className="size-6" />
             )}
           </Link>
-          <Link prefetch="intent" to={`/me/${userId}/messages`}>
+          <Link to={`/me/${userId}/messages`}>
             {isActive("messages") ? (
               <RiMessage2Fill className="size-6" />
             ) : (

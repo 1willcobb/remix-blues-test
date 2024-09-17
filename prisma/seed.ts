@@ -10,18 +10,21 @@ async function seed() {
       email: "alice@remix.run",
       username: "alice",
       password: "aliceiscool",
+      profileImage: "https://d3hspsrf978pst.cloudfront.net/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.webp",
       isAdmin: true,
     },
     {
       email: "bob@remix.run",
       username: "bob",
       password: "bobiscool",
+      profileImage: "https://d3hspsrf978pst.cloudfront.net/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.webp",
       isAdmin: false,
     },
     {
       email: "charlie@remix.run",
       username: "charlie",
       password: "charlieiscool",
+      profileImage: "https://d3hspsrf978pst.cloudfront.net/default-avatar-profile-icon-vector-social-media-user-portrait-176256935.webp",
       isAdmin: false,
     },
   ];

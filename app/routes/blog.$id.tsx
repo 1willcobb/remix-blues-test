@@ -1,18 +1,26 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { loadCommentsForEntity, handleCommentActions } from "~/utils/comments.server";
-import { Comments } from "~/components/Comments";
+import {
+  loadCommentsForEntity,
+  handleCommentActions,
+} from "~/utils/comments.server";
+import Comments from "~/components/Comments";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   return loadCommentsForEntity(params.id, "blog", request);
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
-  return handleCommentActions(request, params, "blog");
+  const formData = await request.formData();
+  return handleCommentActions(request, params.id, "blog", formData);
 };
 
 export default function BlogPost() {
-  const { entity: blog, userId, userLikedEntity: userLikedBlog } = useLoaderData();
+  const {
+    entity: blog,
+    userId,
+    userLikedEntity: userLikedBlog,
+  } = useLoaderData();
 
   return (
     <div>

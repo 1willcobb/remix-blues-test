@@ -36,6 +36,8 @@ export async function getUser(request: Request) {
   const userId = await getUserId(request);
   if (userId === undefined) return null;
 
+  
+
   const user = await getUserById(userId);
   if (user) return user;
 
@@ -57,6 +59,25 @@ export async function requireUserId(
 export async function requireUser(request: Request) {
   const userId = await requireUserId(request);
 
+  const user = await getUserById(userId);
+  if (user) return user;
+
+  throw await logout(request);
+}
+
+export async function requireUserIdForUserData(request: Request, locationCheck: string) {
+  const userId = await requireUserId(request);
+
+
+  console.log('locationCheck', locationCheck);
+
+
+  // Compare locationCheck to userId
+  if (locationCheck !== userId) {
+    throw await logout(request);
+  }
+
+  // If they match, return user
   const user = await getUserById(userId);
   if (user) return user;
 
