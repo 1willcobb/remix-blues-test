@@ -64,7 +64,6 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
-        {/* {data?.user?.permissions === "superadmin" ? <TempNav /> : null} */}
         <Outlet />
         <ScrollRestoration />
         <Scripts />

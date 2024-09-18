@@ -14,12 +14,16 @@ import { defineConfig } from "vitest/config";
 installGlobals();
 
 export default defineConfig({
-  plugins: [mdx({
+  plugins: [
+    {enforce: 'pre', ...mdx({/* jsxImportSource: …, otherOptions… */})},
+    mdx({
     remarkPlugins: [
       remarkFrontmatter,
       remarkMdxFrontmatter,
     ],
-  }),react(), tsconfigPaths()],
+    }),
+    react({include: /\.(jsx|js|mdx|md|tsx|ts)$/}), 
+    tsconfigPaths()],
   ssr: {
     noExternal: ["remix-utils"],
   },

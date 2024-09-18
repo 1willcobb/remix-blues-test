@@ -4,8 +4,9 @@ module.exports = {
   cacheDirectory: "./node_modules/.cache/remix",
   ignoredRouteFiles: ["**/.*", "**/*.test.{ts,tsx}"],
   serverModuleFormat: "cjs",
-  
-serverDependenciesToBundle: [
+
+  serverDependenciesToBundle: [
+    /^@mdx-js\/mdx/,
     /^remix-utils.*/,
     // If you installed is-ip optional dependency you will need these too
     "is-ip",
@@ -17,5 +18,4 @@ serverDependenciesToBundle: [
     "convert-hrtime",
     "is-regexp",
   ],
-  
 };

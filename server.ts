@@ -12,6 +12,11 @@ import express from "express";
 import morgan from "morgan";
 import sourceMapSupport from "source-map-support";
 
+import { Server } from "socket.io";
+import http from "http";
+
+
+
 sourceMapSupport.install();
 installGlobals();
 run();
@@ -38,6 +43,14 @@ async function run() {
       metricsApp,
     }),
   );
+
+  const httpServer = http.createServer(app);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+    },
+  });
+
 
   app.use((req, res, next) => {
     // helpful headers:
@@ -98,10 +111,30 @@ async function run() {
 
   app.use(morgan("tiny"));
 
+  io.on("connection", (socket) => {
+    console.log("A user connected");
+  
+    // When a user joins an event room
+    socket.on("joinEventRoom", (eventRoom) => {
+      console.log("A user joined event room", eventRoom);
+      socket.join(eventRoom);
+    });
+  
+    // Send a message to a specific event room
+    socket.on("sendMessageToEventRoom", (eventRoom, message) => {
+      console.log("Received message:", message);
+      io.to(eventRoom).emit("messageReceived", message);
+    });
+  
+    socket.on("disconnect", () => {
+      console.log("A user disconnected");
+    });
+  });
+
   app.all("*", remixHandler);
 
   const port = process.env.PORT || 3000;
-  app.listen(port, () => {
+  httpServer.listen(port, () => {
     console.log(`✅ app ready: http://localhost:${port}`);
 
     if (process.env.NODE_ENV === "development") {

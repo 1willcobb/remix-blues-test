@@ -15,8 +15,10 @@ import {
   headingsPlugin,
   listsPlugin,
   linkPlugin,
-  quotePlugin
+  quotePlugin,
 } from "~/components/editor.client";
+
+// import { compile } from "@mdx-js/mdx";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   return loadCommentsForEntity(params.id, "blog", request);
@@ -27,19 +29,24 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   return handleCommentActions(request, params.id, "blog", formData);
 };
 
-export default function BlogPost() {
+export default async function BlogPost() {
   const {
     entity: blog,
     userId,
     userLikedEntity: userLikedBlog,
   } = useLoaderData();
 
+  // const compiled = await compile(blog.content);
+
+  // console.log(String(compiled));
+
   return (
     <div>
       <h1>{blog.title}</h1>
       <p>by {blog.author.username}</p>
       <p>{new Date(blog.createdAt).toLocaleDateString()}</p>
-      <ClientOnly fallback={<p>Loading...</p>}>
+
+      {/* <ClientOnly fallback={<p>Loading...</p>}>
         {() => (
           <MDXEditor
             markdown={blog.content}
@@ -53,7 +60,7 @@ export default function BlogPost() {
             ]}
           />
         )}
-      </ClientOnly>
+      </ClientOnly> */}
       <p>{blog.content}</p>
 
       <div>
