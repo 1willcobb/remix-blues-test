@@ -1,7 +1,6 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useEffect } from "react";
 import type { MetaFunction } from "@remix-run/node";
-import { NavLink } from "@remix-run/react";
+import { NavLink, Link } from "@remix-run/react";
 import dunes from "~/images/dunes.jpg";
 import { useOptionalUser, extractUserIdFromFullId } from "~/utils";
 
@@ -16,7 +15,6 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const user = useOptionalUser();
-
 
   useEffect(() => {
     let socket;
@@ -78,20 +76,12 @@ export default function Index() {
           {user ? (
             <div className="flex flex-col justify-center">
               <div className="mx-auto inline-grid grid-cols-2 gap-5 space-y-0">
-                <NavLink
-                  prefetch="viewport"
-                  to="/friends"
-                  className="btn btn-neutral"
-                >
+                <Link to="/friends" className="btn btn-neutral">
                   See Submissions
-                </NavLink>
-                <NavLink
-                  prefetch="viewport"
-                  to={`/me/${user.id}/upload`}
-                  className="btn btn-neutral"
-                >
+                </Link>
+                <Link to={`/me/${user.id}/upload`} className="btn btn-neutral">
                   Submit Photo
-                </NavLink>
+                </Link>
               </div>
               <div className="mt-10 mx-2 p-5 h-full w-full">
                 <p className="text-neutral-content text-center">
@@ -102,20 +92,12 @@ export default function Index() {
           ) : (
             <div className="flex flex-col justify-center">
               <div className="mx-auto inline-grid grid-cols-2 gap-5 space-y-0">
-                <NavLink
-                  prefetch="viewport"
-                  to="/join"
-                  className="btn btn-neutral"
-                >
+                <Link to="/join" className="btn btn-neutral">
                   Sign up
-                </NavLink>
-                <NavLink
-                  prefetch="viewport"
-                  to="/login"
-                  className="btn btn-neutral"
-                >
+                </Link>
+                <Link to="/login" className="btn btn-neutral">
                   Log In
-                </NavLink>
+                </Link>
               </div>
               <div className="mt-10 mx-2 p-5 h-full w-full">
                 <p className="text-white text-center">

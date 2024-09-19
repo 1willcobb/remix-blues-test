@@ -1,5 +1,6 @@
-import { LoaderFunctionArgs } from "@remix-run/node"
-import {  NavLink, Outlet } from "@remix-run/react";
+import React from "react";
+import { LoaderFunctionArgs } from "@remix-run/node";
+import { NavLink, Outlet } from "@remix-run/react";
 
 import { requireUserId } from "~/session.server";
 

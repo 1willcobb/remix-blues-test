@@ -59,8 +59,8 @@ export default function Header({ friendUsername }: HeaderProps) {
               <RiMegaphoneLine className="size-6" />
             )}
           </Link>
-          <Link to={`/me/${userId}/messages`}>
-            {isActive("messages") ? (
+          <Link to={`/me/${userId}/chats`}>
+            {isActive("chats") ? (
               <RiMessage2Fill className="size-6" />
             ) : (
               <RiMessage2Line className="size-6" />

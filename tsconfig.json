@@ -7,6 +7,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "react", // Use React for JSX source
     "module": "CommonJS",
     "moduleResolution": "node",
     "resolveJsonModule": true,

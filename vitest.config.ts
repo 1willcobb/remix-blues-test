@@ -1,8 +1,6 @@
 /// <reference types="vitest" />
 /// <reference types="vite/client" />
 
-
-
 import mdx from "@mdx-js/rollup";
 import { installGlobals } from "@remix-run/node";
 import react from "@vitejs/plugin-react";
@@ -15,15 +13,18 @@ installGlobals();
 
 export default defineConfig({
   plugins: [
-    {enforce: 'pre', ...mdx({/* jsxImportSource: …, otherOptions… */})},
-    mdx({
-    remarkPlugins: [
-      remarkFrontmatter,
-      remarkMdxFrontmatter,
-    ],
+    {
+      enforce: "pre",
+      ...mdx({
+        jsxImportSource: "react", // Ensures that React is automatically handled
+        remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter],
+      }),
+    },
+    react({
+      include: "**/*.{jsx,js,mdx,md,tsx,ts}", // Includes all relevant file extensions
     }),
-    react({include: /\.(jsx|js|mdx|md|tsx|ts)$/}), 
-    tsconfigPaths()],
+    tsconfigPaths(),
+  ],
   ssr: {
     noExternal: ["remix-utils"],
   },

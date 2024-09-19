@@ -1,13 +1,39 @@
-import {
-  Link,
-  useRouteLoaderData,
-  useNavigate,
-  useFetcher,
-} from "@remix-run/react";
-import { useState, useEffect } from "react";
+import type { ActionFunctionArgs } from "@remix-run/node";
+import { Link, useRouteLoaderData, useFetcher } from "@remix-run/react";
+import { useState, useEffect, React } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import FriendHeader from "~/components/FriendHeader";
+
+import { followUser, unfollowUser } from "~/models/userFollow.server";
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  console.log("Action function called");
+  const formData = await request.formData();
+  const follow = formData.get("follow");
+  const unfollow = formData.get("unfollow");
+  const loadedUserId = formData.get("loadedUserId");
+  const userId = formData.get("userId");
+
+  if (follow) {
+    await followUser({
+      followerId: loadedUserId.toString(),
+      followedId: userId.toString(),
+    });
+  }
+
+  if (unfollow) {
+    const followId = formData.get("followId");
+    await unfollowUser(
+      followId.toString(),
+      loadedUserId.toString(),
+      userId.toString(),
+    );
+  }
+
+  return null;
+};
+
 export default function UserIndex() {
   const { posts, friend, isFollowing, pageSize, hasNextPage } =
     useRouteLoaderData("routes/$username");

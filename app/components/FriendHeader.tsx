@@ -7,7 +7,7 @@ import {
   NavLink,
 } from "@remix-run/react";
 
-import { User, UserCount } from "~/models/user.server";
+import { User } from "~/models/user.server";
 
 import { truncateText } from "~/utils";
 
@@ -46,7 +46,7 @@ export default function FriendHeader({ friend, isFollowing }: Props) {
         <h2 className="font-extrabold text-2xl">
           {truncateText(friend?.displayName || friend?.username, 20) ?? null}
         </h2>
-        {friend?.role === "superadmin" ? "⭐️" : " "}
+        {friend?.role === "SUPERADMIN" ? "⭐️" : " "}
       </div>
       <div>
         <p>{friend?.userBio ?? "No bio"}</p>
@@ -71,7 +71,7 @@ export default function FriendHeader({ friend, isFollowing }: Props) {
         </div>
       ) : null}
       <div className="grid grid-cols-2 gap-3">
-        <Form method="post" action="" className="w-full">
+        <Form method="post" action={`/${friend.username}`} className="w-full">
           {isFollowing ? (
             <div>
               <input type="hidden" name="unfollow" value={friend?.id} />
@@ -102,18 +102,19 @@ export default function FriendHeader({ friend, isFollowing }: Props) {
         </Form>
         {user?.username === friend.username ? (
           <NavLink
-            to={`/me/${user.id}/messages`}
+            to={`/me/${user.id}/chats`}
             className="btn btn-outline w-full btn-sm"
           >
             Messages
           </NavLink>
         ) : (
-          <NavLink
-            to={`/${friend.username}/message`}
-            className="btn btn-neutral w-full btn-sm"
-          >
-            Message
-          </NavLink>
+          //! ENDED HERE
+          <Form method="post" action={`/me/${user.id}/chats`}>
+            <input type="hidden" name="NewChat" value={friend?.id} />
+            <button type="submit" className="btn btn-neutral w-full btn-sm">
+              Send Message
+            </button>
+          </Form>
         )}
       </div>
     </section>

@@ -126,3 +126,27 @@ export function truncateText(text, maxLength) {
   }
   return text.substring(0, maxLength) + '...';
 };
+
+export const formatMessageTime = (dateString) => {
+  const messageDate = new Date(dateString);
+  const now = new Date();
+
+  const timeDifference = now.getTime() - messageDate.getTime();
+  const oneHourInMs = 60 * 60 * 1000; // Number of milliseconds in one hour
+
+  if (timeDifference < oneHourInMs) {
+    // If the message is less than 1 hour old, do not display time
+    return null;
+  }
+  const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // Number of milliseconds in one week
+
+  if (timeDifference < oneWeekInMs) {
+    // If the message is less than one week old, format as "Day HH:MM AM/PM"
+    const options = { weekday: "short", hour: "numeric", minute: "numeric", hour12: true };
+    return new Intl.DateTimeFormat("en-US", options).format(messageDate);
+  } else {
+    // If the message is more than one week old, format as "MM/DD/YY"
+    const options = { month: "2-digit", day: "2-digit", year: "2-digit" };
+    return new Intl.DateTimeFormat("en-US", options).format(messageDate);
+  }
+};

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   LoaderFunctionArgs,
   MetaFunction,
@@ -7,10 +8,7 @@ import {
   isRouteErrorResponse,
   useRouteError,
   useLoaderData,
-  useFetcher,
-  useNavigate,
   Outlet,
-  Link,
 } from "@remix-run/react";
 
 import ControlBar from "~/components/ControlBar";
@@ -26,15 +24,10 @@ import {
   getFollowing,
 } from "~/models/userFollow.server";
 
-import InfiniteScroll from "react-infinite-scroll-component";
-
 import { hasUserLiked } from "~/models/like.server";
 import { hasUserVoted } from "~/models/vote.server";
 
-import { useState, useEffect } from "react";
 import invariant from "tiny-invariant";
-
-import PostModal from "~/components/PostModal";
 
 export const meta: MetaFunction = ({ data }) => {
   return [
@@ -47,6 +40,7 @@ export const meta: MetaFunction = ({ data }) => {
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   console.log("Loader function called");
+
   const userId = await requireUserId(request);
   const friend = await getUserByUsername(params.username);
 
@@ -85,6 +79,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  console.log("Action function called");
   const formData = await request.formData();
   const follow = formData.get("follow");
   const unfollow = formData.get("unfollow");
@@ -100,11 +95,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (unfollow) {
     const followId = formData.get("followId");
-    await unfollowUser(
-      followId.toString(),
-      loadedUserId.toString(),
-      userId.toString(),
-    );
+    if (unfollow) {
+      await unfollowUser(loadedUserId.toString(), userId.toString());
+    }
   }
 
   return null;

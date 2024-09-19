@@ -11,10 +11,8 @@ import ErrorBoundaryGeneral from "~/components/ErrorBoundaryGeneral";
 export default function Me() {
   const { user } = useRouteLoaderData("root");
 
-  console.log("me framework: " + user);
-
   return (
-    <main className="flex flex-col min-h-screen">
+    <main className="flex flex-col h-full">
       <Header friendUsername={user.username} />
       <section className="flex flex-grow max-w-lg sm:mx-auto">
         <Outlet />

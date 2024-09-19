@@ -46,6 +46,8 @@ module.exports = {
         ],
       },
       rules: {
+        "react/react-in-jsx-scope": "off",
+        "react/react-in-tsx-scope": "off",
         "react/jsx-no-leaked-render": [
           "warn",
           { validStrategies: ["ternary"] },

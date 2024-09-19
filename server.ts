@@ -15,6 +15,11 @@ import sourceMapSupport from "source-map-support";
 import { Server } from "socket.io";
 import http from "http";
 
+import { EventEmitter } from "events";
+
+// Create and export a singleton instance of EventEmitter
+export const eventEmitter = new EventEmitter();
+
 
 
 sourceMapSupport.install();
@@ -119,12 +124,24 @@ async function run() {
       console.log("A user joined event room", eventRoom);
       socket.join(eventRoom);
     });
+
+    eventEmitter.on("newNotification", (data) => {
+      const { userId, content, chatId } = data;
+  
+      // Emit the notification to the specific user (identified by userId)
+      io.to(userId).emit("newNotification", {
+        content: content,
+        chatId: chatId,
+      });
+    });
   
     // Send a message to a specific event room
     socket.on("sendMessageToEventRoom", (eventRoom, message) => {
       console.log("Received message:", message);
       io.to(eventRoom).emit("messageReceived", message);
     });
+
+
   
     socket.on("disconnect", () => {
       console.log("A user disconnected");
