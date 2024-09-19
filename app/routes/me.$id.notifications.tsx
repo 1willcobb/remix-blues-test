@@ -5,35 +5,41 @@ import {
   getNotificationsByUser,
   setNotifications,
 } from "~/models/notification.server";
-import { getUserId } from "~/session.server";
-
+import { getUserId, requireUserId } from "~/session.server";
 
 import io from "socket.io-client";
 
+const socket = io("http://localhost:3000/");
 
 export const loader = async ({ request }) => {
-  const userId = await getUserId(request);
+  const userId = await requireUserId(request);
   const notifications = await getNotificationsByUser({ userId });
 
-  console.log("notifications", notifications);
-  return { notifications };
+  // console.log("Notifications:", notifications);
+
+  return { notifications, userId };
 };
 
 export default function Notifications() {
-  const { notifications } = useLoaderData();
-  const [newNotifications, setNotifications] = useState(notifications || []);
+  const { notifications, userId } = useLoaderData();
+  const [newNotifications, setNewNotifications] = useState(notifications || []);
 
   useEffect(() => {
-    const socket = io("http://localhost:3000/");
+    // Join notification room
+    socket.emit("joinNotificationRoom", userId);
+    console.log("Joined notification room?");
 
+    // Listen for new notifications
     socket.on("newNotification", (notification) => {
-      setNotifications((prev) => [...prev, notification]);
+      console.log("New notification received:", notification);
+      setNewNotifications((prev) => [...prev, notification]);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
-  
   return (
     <div>
       {newNotifications

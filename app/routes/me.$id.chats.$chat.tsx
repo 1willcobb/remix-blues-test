@@ -5,7 +5,7 @@ import {
   useLoaderData,
   useFetcher,
 } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import { requireUserId } from "~/session.server";
 
@@ -18,7 +18,6 @@ import { getChatById } from "~/models/chat.server";
 import { createMessage } from "~/models/message.server";
 
 import { formatMessageTime } from "~/utils";
-import { text } from "stream/consumers";
 
 const socket = io("http://localhost:3000/");
 
@@ -53,6 +52,7 @@ export const action = async ({ request }) => {
   });
 
   // Emit the new message via Socket.io
+  console.log("Emitting message to event room", chatId);
   socket.emit("sendMessageToEventRoom", chatId, newMessage);
 
   return null;
@@ -64,22 +64,29 @@ export default function Chat() {
   const [chatHistory, setChatHistory] = useState(messages || []);
   const [textareaValue, setTextareaValue] = useState("");
 
+  const messagesEndRef = useRef(null);
+
   // Ensure chatHistory is updated when chatId changes
   useEffect(() => {
     setChatHistory(messages || []);
     socket.emit("joinEventRoom", chatId);
+    scrollToBottom();
   }, [chatId, messages]);
 
   // Listen for new messages and update the chat history
   useEffect(() => {
-    socket.on("messageReceived", (message) => {
+    const handleMessageReceived = (message) => {
       setChatHistory((prev) => [...prev, message]);
-    });
+      scrollToBottom();
+    };
+
+    socket.on("messageReceived", handleMessageReceived);
 
     return () => {
-      socket.off("messageReceived");
+      // Cleanup: Remove the event listener when the component unmounts
+      socket.off("messageReceived", handleMessageReceived);
     };
-  }, []);
+  }, [chatId]);
 
   const handleSendMessage = (event) => {
     event.preventDefault();
@@ -91,6 +98,14 @@ export default function Chat() {
     // Reset form after submission
     textareaValue && setTextareaValue("");
     event.currentTarget.reset();
+    scrollToBottom();
+  };
+
+  // Function to handle scrolling to the bottom (newest message)
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const handleTextareaChange = (e) => {
@@ -142,6 +157,7 @@ export default function Chat() {
         method="post"
         onSubmit={handleSendMessage}
         className="flex w-full justify-between items-center gap-3"
+        ref={messagesEndRef}
       >
         <input type="hidden" name="chatId" value={chatId} />
         <input type="hidden" name="userId" value={userId} />
@@ -157,7 +173,9 @@ export default function Chat() {
         <button type="submit" className="btn btn-primary btn-sm">
           Send
         </button>
+
       </form>
+      
     </section>
   );
 }

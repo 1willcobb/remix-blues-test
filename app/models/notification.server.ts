@@ -28,7 +28,7 @@ export async function createNotification({
 export async function getNotificationsByUser({
   userId,
   page = 1,
-  pageSize = 10,
+  pageSize = 100,
 }: {
   userId: string;
   page?: number;

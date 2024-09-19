@@ -15,13 +15,6 @@ import sourceMapSupport from "source-map-support";
 import { Server } from "socket.io";
 import http from "http";
 
-import { EventEmitter } from "events";
-
-// Create and export a singleton instance of EventEmitter
-export const eventEmitter = new EventEmitter();
-
-
-
 sourceMapSupport.install();
 installGlobals();
 run();
@@ -116,32 +109,32 @@ async function run() {
 
   app.use(morgan("tiny"));
 
+
+
+
   io.on("connection", (socket) => {
     console.log("A user connected");
   
-    // When a user joins an event room
+    // User joins their own room for notifications (using their userId)
+    socket.on("joinNotificationRoom", (userId) => {
+      console.log(`User ${userId} joined notification room`);
+      socket.join(userId); // Joining notification room based on userId
+    });
+  
+    // User joins a specific event room (for chat sessions)
     socket.on("joinEventRoom", (eventRoom) => {
       console.log("A user joined event room", eventRoom);
-      socket.join(eventRoom);
+      socket.join(eventRoom); // Joining event room (chat room)
     });
 
-    eventEmitter.on("newNotification", (data) => {
-      const { userId, content, chatId } = data;
   
-      // Emit the notification to the specific user (identified by userId)
-      io.to(userId).emit("newNotification", {
-        content: content,
-        chatId: chatId,
-      });
-    });
-  
-    // Send a message to a specific event room
+    // Send a message to a specific event room (chat message)
     socket.on("sendMessageToEventRoom", (eventRoom, message) => {
       console.log("Received message:", message);
+  
+      // Emit the message to everyone in the event room (chat room)
       io.to(eventRoom).emit("messageReceived", message);
     });
-
-
   
     socket.on("disconnect", () => {
       console.log("A user disconnected");
