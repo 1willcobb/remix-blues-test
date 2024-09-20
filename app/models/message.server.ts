@@ -55,6 +55,7 @@ export async function createMessage({
       createNotification({
         userId: recipient.id,
         content: `New message from ${user.username} stating: ${content}`,
+        link: `/me/${recipient.id}/chats/${chatId}`,
       })
     )
   );

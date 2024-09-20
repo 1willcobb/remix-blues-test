@@ -115,42 +115,48 @@ export default function Chat() {
   };
 
   return (
-    <section className="container h-full flex flex-col items-center justify-center p-1">
+    <section className="container flex flex-col items-center justify-center p-1">
       <h1 className="text-center font-extrabold flex-start">
         Chat w/ {friend.username}
       </h1>
-      <div className="flex flex-col items-center justify-center overflow-y-scroll size-full ">
-        <ul id="messages" className="h-full w-full p-1">
-          {chatHistory.map((message) => (
-            <li key={message.id}>
-              {message.userId === userId ? (
-                <div className="flex justify-end gap-3">
-                  <p>{formatMessageTime(message.createdAt)}</p>
-                  <h3>{message.user.username}</h3>
-                </div>
-              ) : (
-                <div className="flex justify-start gap-3">
-                  <h3>{message.user.username}</h3>
-                  <p>{formatMessageTime(message.createdAt)}</p>
-                </div>
-              )}
+      {/* Chat area with scrollable messages */}
+      <div className="flex flex-col w-full ">
+        <div className="flex flex-col w-full ">
+          <ul id="messages" className="w-full p-1">
+            {chatHistory.map((message) => (
+              <li key={message.id}>
+                {message.userId === userId ? (
+                  <div className="flex justify-end gap-3">
+                    <p>{formatMessageTime(message.createdAt)}</p>
+                    <h3>{message.user.username}</h3>
+                  </div>
+                ) : (
+                  <div className="flex justify-start gap-3">
+                    <h3>{message.user.username}</h3>
+                    <p>{formatMessageTime(message.createdAt)}</p>
+                  </div>
+                )}
 
-              <div
-                className={`flex ${
-                  message.userId === userId ? "justify-end" : "justify-start"
-                }`}
-              >
-                <p
-                  className={`${
-                    message.userId === userId ? "bg-blue-50" : "bg-red-50"
-                  } inline-block max-w-xs rounded-xl px-4 py-2 font-bold`}
+                <div
+                  className={`flex ${
+                    message.userId === userId ? "justify-end" : "justify-start"
+                  }`}
                 >
-                  {message.content}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  <p
+                    className={`${
+                      message.userId === userId
+                        ? "bg-blue-50 text-right ml-10"
+                        : "bg-red-50 mr-10"
+                    } inline-block max-w-xs rounded-xl px-4 py-2 font-bold `}
+                  >
+                    {message.content}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       <form
@@ -173,9 +179,7 @@ export default function Chat() {
         <button type="submit" className="btn btn-primary btn-sm">
           Send
         </button>
-
       </form>
-      
     </section>
   );
 }

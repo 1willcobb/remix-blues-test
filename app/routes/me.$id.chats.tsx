@@ -46,11 +46,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const deleteSignal = formData.get("delete");
   const chatId = formData.get("chatId");
 
-
   if (deleteSignal === "true") {
     console.log("delete chat", deleteChat);
     const deletedChat = await deleteChat(chatId);
-    
+
     return redirect(`/me/${params.id}/chats`);
   }
 

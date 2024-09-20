@@ -14,7 +14,7 @@ export default function Me() {
   return (
     <main className="flex flex-col h-full">
       <Header friendUsername={user.username} />
-      <section className="flex flex-grow max-w-lg sm:mx-auto">
+      <section className="flex flex-grow max-w-lg mx-auto">
         <Outlet />
       </section>
       <ControlBar />

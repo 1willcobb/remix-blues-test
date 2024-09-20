@@ -5,15 +5,18 @@ import type { Notification } from "@prisma/client";
 export async function createNotification({
   userId,
   content,
+  link
 }: {
   userId: string;
   content: string;
+  link?: string;
 }): Promise<Notification> {
   try {
     const notification = await prisma.notification.create({
       data: {
         user: { connect: { id: userId } },
         content,
+        link,
       },
       include: { user: true },
     });
@@ -36,7 +39,7 @@ export async function getNotificationsByUser({
 }): Promise<Notification[]> {
   const skip = (page - 1) * pageSize;
 
-  return prisma.notification.findMany({
+  return await prisma.notification.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
     skip,
@@ -46,7 +49,7 @@ export async function getNotificationsByUser({
 
 // Mark notifications as read
 export async function markNotificationAsRead(notificationId: string): Promise<Notification> {
-  return prisma.notification.update({
+  return await prisma.notification.update({
     where: { id: notificationId },
     data: { isRead: true },
     include: { user: true },
@@ -55,8 +58,15 @@ export async function markNotificationAsRead(notificationId: string): Promise<No
 
 // Delete a notification
 export async function deleteNotification(notificationId: string): Promise<Notification> {
-  return prisma.notification.delete({
+  return await prisma.notification.delete({
     where: { id: notificationId },
     include: { user: true },
+  });
+}
+
+// Delete all notifications for a user
+export async function deleteAllUserNotifications(userId: string): Promise<void> {
+  return await prisma.notification.deleteMany({
+    where: { userId },
   });
 }
