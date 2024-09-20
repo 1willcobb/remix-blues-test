@@ -4,17 +4,20 @@ import { prisma } from "~/db.server";
 
 export async function createBlog({
   title,
+  subtitle,
   content,
   authorId,
 }: {
   title: string;
+  subtitle: string;
   content: string;
   authorId: string;
 }): Promise<Blog> {
-  return prisma.blog.create({
+  const blog = await prisma.blog.create({
     data: {
       title,
       content,
+      subtitle,
       author: { connect: { id: authorId } },
     },
     include: {
@@ -23,6 +26,9 @@ export async function createBlog({
       likes: true,
     },
   });
+
+  console.log("Blog created:", blog);
+  return blog
 }
 
 export async function getBlogs(page: number = 1, pageSize: number = 10): Promise<Blog[]> {
@@ -83,7 +89,8 @@ export async function updateBlog({
 }
 
 export async function deleteBlog(blogId: string): Promise<Blog> {
-  return prisma.blog.delete({
+  console.log("Deleting blog with id:", blogId);
+  const deletedBlog = await prisma.blog.delete({
     where: { id: blogId },
     include: {
       author: true,
@@ -91,5 +98,9 @@ export async function deleteBlog(blogId: string): Promise<Blog> {
       likes: true,
     },
   });
+
+  console.log("Blog deleted:", deletedBlog);
+
+  return deletedBlog
 }
 

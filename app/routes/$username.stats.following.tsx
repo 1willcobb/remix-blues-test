@@ -1,6 +1,7 @@
+import React from "react";
 import { useState } from "react";
 import type { ActionFunctionArgs } from "@remix-run/node";
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, Link, Form, useParams } from "@remix-run/react";
 import { getUserByUsername } from "~/models/user.server";
 

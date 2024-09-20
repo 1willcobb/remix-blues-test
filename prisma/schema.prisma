@@ -37,6 +37,7 @@ model User {
   followers      UserFollow[]         @relation("followersRelation")
   votes          Vote[]
   chats          Chat[]               @relation("ChatParticipants")
+  notifications  Notification[]
 }
 
 model Password {
@@ -131,6 +132,7 @@ model Blog {
   title        String
   subtitle     String?
   content      String
+  titleImage   String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   authorId     String
@@ -169,6 +171,16 @@ model Flag {
   blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: Cascade)
   comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  content   String
+  link      String?
+  createdAt DateTime @default(now())
+  isRead    Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

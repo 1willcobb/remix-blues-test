@@ -8,6 +8,15 @@ import { getUserFeed } from "~/models/post.server";
 import { hasUserLiked } from "~/models/like.server";
 import { hasUserVoted } from "~/models/vote.server";
 
+export const meta: MetaFunction = ({ data }) => {
+  return [
+    {
+      title: `MyFilmFriends`,
+      description: "A community for photography lovers.",
+    },
+  ];
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
   const url = new URL(request.url);

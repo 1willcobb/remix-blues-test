@@ -41,8 +41,6 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await getUser(request);
-
-  console.log("user", user);
   return { user };
 };
 
@@ -53,7 +51,7 @@ export default function App() {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="icon" href="/_static/favicon.ico" />
-        <link rel="apple-touch-icon" href="/_static/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.ico" />
         <link rel="mask-icon" href="/_static/favicon.ico" color="#000000" />
         <link
           rel="apple-touch-startup-image"
@@ -64,7 +62,6 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
-        {/* {data?.user?.permissions === "superadmin" ? <TempNav /> : null} */}
         <Outlet />
         <ScrollRestoration />
         <Scripts />

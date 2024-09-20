@@ -1,18 +1,41 @@
-import { useRouteLoaderData, Link } from "@remix-run/react";
+import type { ActionFunctionArgs } from "@remix-run/node";
+import { useRouteLoaderData, Link, useFetcher } from "@remix-run/react";
+
+import dune from "~/images/dunes.jpg";
+import { getUser } from "~/session.server";
+import { deleteBlog } from "~/models/blog.server";
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const blogId = formData.get("blogId");
+  const deleteFlag = formData.get("delete");
+  const user = await getUser(request);
+
+  console.log(user);
+  console.log(deleteFlag);
+  console.log(blogId);
+
+  if (deleteFlag && user.role === "SUPERADMIN") {
+    await deleteBlog(blogId);
+  }
+
+  return null;
+};
 
 export default function Blog() {
-  const { blogs, page, hasNextPage } = useRouteLoaderData(`routes/blog`);
+  const { blogs, page, hasNextPage, user } = useRouteLoaderData(`routes/blog`);
+  const fetcher = useFetcher();
 
   return (
     <div>
       <ul className="flex flex-col">
         {blogs.map((blog) => (
-          <li className="card bg-base-100 w-96 shadow-xl" key={blog.id}>
+          <li
+            className="card bg-base-100 w-96 shadow-xl"
+            key={blog.id}
+          >
             <figure>
-              <img
-                src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-                alt="Shoes"
-              />
+              <img src={blog.titleImage || dune} alt={blog.title} />
             </figure>
             <div className="card-body">
               <h2 className="card-title">{blog.title}</h2>
@@ -22,6 +45,15 @@ export default function Blog() {
                   Read More
                 </Link>
               </div>
+              {user.role === "SUPERADMIN" ? (
+                <fetcher.Form method="post">
+                  <input type="hidden" name="blogId" value={blog.id} />
+                  <input type="hidden" name="delete" value="delete" />
+                  <button type="submit" className="btn btn-warning btn-sm">
+                    Delete
+                  </button>
+                </fetcher.Form>
+              ) : null}
             </div>
           </li>
         ))}
